@@ -1,22 +1,22 @@
 ﻿using Shard.Shared.Core;
-using Shard.Web.ImplementationAPI.systems.dto;
+using Shard.Web.ImplementationAPI.Systems.Dto;
 
-namespace Shard.Web.ImplementationAPI.systems;
+namespace Shard.Web.ImplementationAPI.Systems;
 
 public class SystemsService
 {
     private readonly SectorSpecification _sectorSpecification;
 
-    public SystemsService()
+    public SystemsService(MapGenerator mapGenerator)
     {
-        var random = new Random();
-
-        var options = new MapGeneratorOptions
-        {
-            Seed = random.Next().ToString()
-        };
-
-        var mapGenerator = new MapGenerator(options);
+        // var random = new Random();
+        //
+        // var options = new MapGeneratorOptions
+        // {
+        //     Seed = random.Next().ToString()
+        // };
+        //
+        // var mapGenerator = new MapGenerator(options);
         _sectorSpecification = mapGenerator.Generate();
     }
 

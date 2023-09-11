@@ -1,4 +1,5 @@
-﻿using Shard.Web.ImplementationAPI.systems;
+﻿using Shard.Shared.Core;
+using Shard.Web.ImplementationAPI.Systems;
 
 namespace Shard.Web.ImplementationAPI;
 
@@ -13,8 +14,15 @@ public class Startup
 
     public void ConfigureServices(IServiceCollection services)
     {
+        MapGeneratorOptions options = new MapGeneratorOptions
+        {
+            Seed = Configuration.GetSection("MapGenerator").GetSection("Options").GetSection("Seed").Value,
+        };
+        
+        MapGenerator mapGenerator = new MapGenerator(options);
         // Add all the services here that are needed by the controllers and should be considered as singletons
         services.AddSingleton<SystemsService>();
+        services.AddSingleton(mapGenerator);
         services.AddControllers();
     }
 

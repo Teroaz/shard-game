@@ -1,6 +1,6 @@
 ﻿using Shard.Shared.Core;
 
-namespace Shard.Web.ImplementationAPI.systems.dto;
+namespace Shard.Web.ImplementationAPI.Systems.Dto;
 
 public record SystemDto
 {
