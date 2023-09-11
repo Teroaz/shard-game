@@ -14,15 +14,17 @@ public class Startup
 
     public void ConfigureServices(IServiceCollection services)
     {
-        MapGeneratorOptions options = new MapGeneratorOptions
+        var options = new MapGeneratorOptions
         {
-            Seed = Configuration.GetSection("MapGenerator").GetSection("Options").GetSection("Seed").Value,
+            Seed = Configuration.GetSection("MapGenerator:Options:Seed").Value,
         };
-        
-        MapGenerator mapGenerator = new MapGenerator(options);
+
+        var mapGenerator = new MapGenerator(options);
+
         // Add all the services here that are needed by the controllers and should be considered as singletons
-        services.AddSingleton<SystemsService>();
         services.AddSingleton(mapGenerator);
+        services.AddSingleton<ISystemsRepository, SystemsRepository>();
+        services.AddSingleton<ISystemsService, SystemsService>();
         services.AddControllers();
     }
 

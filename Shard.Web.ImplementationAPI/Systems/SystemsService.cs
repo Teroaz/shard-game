@@ -1,33 +1,31 @@
-﻿using Shard.Shared.Core;
-using Shard.Web.ImplementationAPI.Systems.Dto;
+﻿using Shard.Web.ImplementationAPI.Systems.DTOs;
 
 namespace Shard.Web.ImplementationAPI.Systems;
 
-public class SystemsService
+public interface ISystemsService
 {
-    private readonly SectorSpecification _sectorSpecification;
+    IReadOnlyList<SystemDto> GetAllSystems();
+    SystemDto? GetSystem(string systemName);
+}
 
-    public SystemsService(MapGenerator mapGenerator)
+public class SystemsService : ISystemsService
+{
+    private readonly ISystemsRepository _systemsRepository;
+
+    public SystemsService(ISystemsRepository systemsRepository)
     {
-        // var random = new Random();
-        //
-        // var options = new MapGeneratorOptions
-        // {
-        //     Seed = random.Next().ToString()
-        // };
-        //
-        // var mapGenerator = new MapGenerator(options);
-        _sectorSpecification = mapGenerator.Generate();
+        _systemsRepository = systemsRepository;
     }
 
-    public List<SystemDto> GetAllSystems()
+    public IReadOnlyList<SystemDto> GetAllSystems()
     {
-        return _sectorSpecification.Systems.Select(system => new SystemDto(system)).ToList();
+        var systems = _systemsRepository.GetAllSystems();
+        return systems.Select(system => new SystemDto(system)).ToList();
     }
 
     public SystemDto? GetSystem(string systemName)
     {
-        var system = _sectorSpecification.Systems.FirstOrDefault(system => system.Name == systemName);
+        var system = _systemsRepository.GetSystem(systemName);
         return system == null ? null : new SystemDto(system);
     }
 }

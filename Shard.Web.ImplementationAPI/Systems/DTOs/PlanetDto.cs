@@ -1,6 +1,6 @@
 ﻿using Shard.Shared.Core;
 
-namespace Shard.Web.ImplementationAPI.Systems.Dto;
+namespace Shard.Web.ImplementationAPI.Systems.DTOs;
 
 public record PlanetDto
 {
