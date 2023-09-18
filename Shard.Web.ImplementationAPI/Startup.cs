@@ -20,7 +20,7 @@ public class Startup
         {
             var options = new MapGeneratorOptions
             {
-                Seed = Configuration.GetSection("MapGenerator").GetSection("Options").GetSection("Seed").Value,
+                Seed = Configuration.GetSection("MapGenerator:Options:Seed").Value,
             };
             
             return new MapGenerator(options);
