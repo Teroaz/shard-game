@@ -7,15 +7,15 @@ namespace Shard.Web.ImplementationAPI.Users;
 public interface IUserService
 {
     Boolean IsBodyValid(string id, UserBodyDto? userBody);
-    UserDto? UpdateUser(string id, UserBodyDto userBody);
+    UserDto CreateUpdateUser(string id, UserBodyDto userBody);
 }
 
-public class UserService : IUserService
+public class UsersService : IUserService
 {
     
     private readonly IUserRepository _userRepository; 
     
-    public UserService(IUserRepository userRepository)
+    public UsersService(IUserRepository userRepository)
     {
         _userRepository = userRepository;
     }
@@ -27,17 +27,18 @@ public class UserService : IUserService
             return false;
         }
 
-        // Regular expression to check for alphanumerical characters, underscores, and dashes
-        return new Regex("^[a-zA-Z0-9_-]+$").IsMatch(id);
+        var regex = new Regex("^[a-zA-Z0-9_-]+$");
+        
+        return !regex.IsMatch(id);
     }
 
-    public UserDto? UpdateUser(string id, UserBodyDto userBody)
+    public UserDto CreateUpdateUser(string id, UserBodyDto userBody)
     {
         var user = _userRepository.GetUserById(id);
-
         if (user == null)
         {
-            return null;
+            user = new UserModel(userBody.Id, userBody.Pseudo, DateTimeOffset.Now.ToString("yyyy-MM-ddTHH:mm:ss.fffK"));
+            _userRepository.AddUser(user);
         }
         
         return new UserDto(user);

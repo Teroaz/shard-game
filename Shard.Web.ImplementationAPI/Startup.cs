@@ -20,8 +20,8 @@ public class Startup
         services.AddSingleton<ISystemsRepository, SystemsRepository>();
         services.AddSingleton<ISystemsService, SystemsService>();
         services.AddSingleton<IUnitsService, UnitsService>();
-        services.AddSingleton<IUserService, UserService>();
-        services.AddSingleton<IUserRepository, UserRepository>();
+        services.AddSingleton<IUserService, UsersService>();
+        services.AddSingleton<IUserRepository, UsersRepository>();
         services.AddSingleton<MapGenerator>((_) =>
         {
             var options = new MapGeneratorOptions

@@ -8,17 +8,15 @@ public interface IUserRepository
     UserModel? GetUserById(string id);
 }
 
-public class UserRepository : IUserRepository
+public class UsersRepository : IUserRepository
 { 
     List<UserModel> Users { get; init; }
     
-    public UserRepository()
+    public UsersRepository()
     {
         Users = new List<UserModel>();
     }
-    
-    // TODO add method to populate 2/3 users for testing
-    
+
     public void AddUser(UserModel userModel)
     {
         Users.Add(userModel);

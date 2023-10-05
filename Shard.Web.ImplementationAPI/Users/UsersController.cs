@@ -5,12 +5,12 @@ namespace Shard.Web.ImplementationAPI.Users;
 
 [ApiController]
 [Route("[controller]")]
-public class UserController : ControllerBase
+public class UsersController : ControllerBase
 {
     
     private readonly IUserService _userService;
     
-    public UserController(IUserService userService)
+    public UsersController(IUserService userService)
     {
         _userService = userService;
     }
@@ -22,15 +22,10 @@ public class UserController : ControllerBase
         
         if(!isValid)
         {
-            return BadRequest();
+            return BadRequest("Something went wrong.");
         }
         
-        var user = _userService.UpdateUser(id, userBody);
-        
-        if (user == null)
-        {
-            return NotFound();
-        }
+        var user = _userService.CreateUpdateUser(id, userBody);
         
         return Ok(user);
     }
