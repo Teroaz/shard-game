@@ -10,5 +10,9 @@
         <ProjectReference Include="..\Shard.Shared.Core\Shard.Shared.Core.csproj" />
         <ProjectReference Include="..\Shard.Shared.Web.IntegrationTests\Shard.Shared.Web.IntegrationTests.csproj" />
     </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="Units\DTOs\" />
+    </ItemGroup>
     
 </Project>
