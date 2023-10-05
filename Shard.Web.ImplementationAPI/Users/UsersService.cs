@@ -8,6 +8,7 @@ public interface IUserService
 {
     Boolean IsBodyValid(string id, UserBodyDto? userBody);
     UserDto CreateUpdateUser(string id, UserBodyDto userBody);
+    UserDto? GetUserById(string id);
 }
 
 public class UsersService : IUserService
@@ -18,6 +19,13 @@ public class UsersService : IUserService
     public UsersService(IUserRepository userRepository)
     {
         _userRepository = userRepository;
+    }
+    
+    public UserDto? GetUserById(string id)
+    {
+        var user = _userRepository.GetUserById(id);
+        
+        return user == null ? null : new UserDto(user);
     }
     
     public Boolean IsBodyValid(string id, UserBodyDto? userBody)

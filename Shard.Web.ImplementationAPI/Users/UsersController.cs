@@ -15,6 +15,13 @@ public class UsersController : ControllerBase
         _userService = userService;
     }
     
+    [HttpGet("{id}")]
+    public ActionResult<UserDto> GetUser(string id)
+    {
+        var user = _userService.GetUserById(id);
+        return user == null ? NotFound() : Ok(user);
+    }
+    
     [HttpPut("{id}")]
     public ActionResult<UserDto> PutUser(string id, [FromBody] UserBodyDto userBody)
     {
