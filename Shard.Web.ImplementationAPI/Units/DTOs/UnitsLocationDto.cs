@@ -9,13 +9,13 @@ public class UnitsLocationDto
 
     public string Planet {get; init; }
     
-    public IReadOnlyDictionary<ResourceKind, int>? ResourceQuantity { get; } 
+    public IReadOnlyDictionary<ResourceKind, int>? ResourcesQuantity { get; } 
 
-    public UnitsLocationDto(UnitsModel unitsModel, IReadOnlyDictionary<ResourceKind, int> resourceQuantity)
+    public UnitsLocationDto(UnitsModel unitsModel, IReadOnlyDictionary<ResourceKind, int>? resourceQuantity)
     {
         System = unitsModel.System;
         Planet = unitsModel.Planet;
-        ResourceQuantity = resourceQuantity;
+        ResourcesQuantity = resourceQuantity ?? new Dictionary<ResourceKind, int>();
     }
     
 }

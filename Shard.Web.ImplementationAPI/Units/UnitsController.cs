@@ -64,9 +64,7 @@ public class UnitsController : ControllerBase
         
         var system = _systemsService.GetSystem(unit.System);
         var planet = system?.Planets.FirstOrDefault(planet => planet.Name == unit.Planet);
-        var resourceQuantity = planet?.ResourceQuantity == null ?  
-            new Dictionary<ResourceKind, int>() : 
-            planet.ResourceQuantity;
+        var resourceQuantity = planet?.ResourceQuantity;
         return Ok(new UnitsLocationDto(unit, resourceQuantity));
     }
 
