@@ -37,7 +37,7 @@ public class UsersService : IUserService
 
         var regex = new Regex("^[a-zA-Z0-9_-]+$");
         
-        return !regex.IsMatch(id);
+        return regex.IsMatch(id);
     }
 
     public UserDto CreateUpdateUser(string id, UserBodyDto userBody)
