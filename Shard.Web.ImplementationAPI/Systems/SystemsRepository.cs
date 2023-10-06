@@ -1,12 +1,7 @@
 ﻿using Shard.Shared.Core;
+using Shard.Web.ImplementationAPI.Models;
 
 namespace Shard.Web.ImplementationAPI.Systems;
-
-public interface ISystemsRepository
-{
-    IReadOnlyList<SystemSpecification> GetAllSystems();
-    SystemSpecification? GetSystem(string systemName);
-}
 
 public class SystemsRepository : ISystemsRepository
 {
@@ -17,13 +12,14 @@ public class SystemsRepository : ISystemsRepository
         _sectorSpecification = mapGenerator.Generate();
     }
 
-    public IReadOnlyList<SystemSpecification> GetAllSystems()
+    public IEnumerable<SystemModel> GetAllSystems()
     {
-        return _sectorSpecification.Systems;
+        return _sectorSpecification.Systems.Select(system => new SystemModel(system)).ToList();
     }
 
-    public SystemSpecification? GetSystem(string systemName)
+    public SystemModel? GetSystem(string systemName)
     {
-        return _sectorSpecification.Systems.FirstOrDefault(system => system.Name == systemName);
+        var system = _sectorSpecification.Systems.FirstOrDefault(system => system.Name == systemName);
+        return system == null ? null : new SystemModel(system);
     }
 }

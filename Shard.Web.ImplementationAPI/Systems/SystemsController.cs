@@ -15,7 +15,6 @@ public class SystemsController : ControllerBase
     }
 
     [HttpGet]
-    [ProducesResponseType(typeof(List<SystemDto>), StatusCodes.Status200OK)]
     public ActionResult<List<SystemDto>> Get()
     {
         var systems = _systemsService.GetAllSystems();
@@ -23,7 +22,6 @@ public class SystemsController : ControllerBase
     }
 
     [HttpGet("{systemName}")]
-    [ProducesResponseType(typeof(SystemDto), StatusCodes.Status200OK)]
     public ActionResult<SystemDto> Get(string systemName)
     {
         var system = _systemsService.GetSystem(systemName);
@@ -31,7 +29,6 @@ public class SystemsController : ControllerBase
     }
 
     [HttpGet("{systemName}/planets")]
-    [ProducesResponseType(typeof(List<PlanetDto>), StatusCodes.Status200OK)]
     public ActionResult<List<PlanetDto>> GetPlanets(string systemName)
     {
         var system = _systemsService.GetSystem(systemName);
@@ -39,7 +36,6 @@ public class SystemsController : ControllerBase
     }
 
     [HttpGet("{systemName}/planets/{planetName}")]
-    [ProducesResponseType(typeof(PlanetDto), StatusCodes.Status200OK)]
     public ActionResult<PlanetDto> GetPlanet(string systemName, string planetName)
     {
         var system = _systemsService.GetSystem(systemName);
