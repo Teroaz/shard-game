@@ -2,11 +2,11 @@ namespace Shard.Web.ImplementationAPI.Model;
 
 public class UserModel
 {
-    public string Id { get; init; }
+    public string Id { get; set; }
     
-    public string Pseudo { get; init; }
+    public string Pseudo { get; set; }
     
-    public string DateOfCreation { get; init; }
+    public string DateOfCreation { get; set; }
     
     public UserModel(string id, string pseudo, string dateOfCreation)
     {

@@ -3,7 +3,7 @@ using Shard.Web.ImplementationAPI.Model;
 namespace Shard.Web.ImplementationAPI.Users;
 
 
-public class UsersesRepository : IUsersRepository
+public class UsersRepository : IUsersRepository
 { 
     private readonly List<UserModel> _users = new List<UserModel>();
 
