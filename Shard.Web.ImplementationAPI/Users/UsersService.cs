@@ -1,5 +1,6 @@
 using System.Text.RegularExpressions;
 using Shard.Web.ImplementationAPI.Model;
+using Shard.Web.ImplementationAPI.Services;
 using Shard.Web.ImplementationAPI.Users.Dtos;
 
 namespace Shard.Web.ImplementationAPI.Users;
@@ -8,10 +9,12 @@ public class UsersService : IUserService
 {
     
     private readonly IUsersRepository _usersRepository; 
+    private readonly ICommon _common;
     
-    public UsersService(IUsersRepository usersRepository)
+    public UsersService(IUsersRepository usersRepository, ICommon common)
     {
         _usersRepository = usersRepository;
+        _common = common;
     }
 
     public Boolean IsIdConsistant(string id)
@@ -39,7 +42,7 @@ public class UsersService : IUserService
             return false;
         }
 
-        return IsIdConsistant(userBody.Id);
+        return _common.IsIdConsistant(id, "^[a-zA-Z0-9_-]+$");
     }
 
     public UserDto CreateUpdateUser(string id, UserBodyDto userBody)

@@ -1,8 +1,12 @@
-using Shard.Web.ImplementationAPI.Units.DTOs;
+using Shard.Web.ImplementationAPI.Models;
 
 namespace Shard.Web.ImplementationAPI.Units;
 
-public class IUnitsRepository
+public interface IUnitsRepository
 {
-    private List<UnitsDto> _units = new();
+    UnitsModel? GetUnitByIdAndUser(string id, string userId);
+    
+    List<UnitsModel> GetUnitsByUser(string userId);
+    
+    void AddUnit(UnitsModel unit);
 }

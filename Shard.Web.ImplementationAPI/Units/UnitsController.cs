@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Shard.Web.ImplementationAPI.Units.DTOs;
 using Shard.Web.ImplementationAPI.Users;
 
 namespace Shard.Web.ImplementationAPI.Units;
@@ -8,6 +9,7 @@ public class UnitsController : ControllerBase
 {
     
     private readonly IUnitsService _unitsService;
+    
     private readonly IUserService _userService;
     public UnitsController(IUnitsService unitsService, IUserService userService)
     {
@@ -19,18 +21,38 @@ public class UnitsController : ControllerBase
     public ActionResult Get(string userId)
     {
         var user = _userService.GetUserById(userId);
+
         if (user == null)
         {
-            return NotFound();
+            return NotFound("Not found.");
         }
         
-        return Ok();
+        var units = _unitsService.GetUnitsByUser(userId);
+        
+        return Ok(units);
     }
 
     [HttpPut("/users/{userId}/Units/{unitId}")]
-    public ActionResult Put()
+    public ActionResult<UnitsDto> Put(string unitId, string userId, [FromBody] UnitsBodyDto unitsBodyDto)
     {
-        return Ok();
+        
+        var isValid = _unitsService.IsBodyValid(unitId, userId, unitsBodyDto);
+        
+        if(!isValid)
+        {
+            return BadRequest("Bad request.");
+        }
+        
+        var user = _userService.GetUserById(userId);
+
+        if (user == null)
+        {
+            return NotFound("Not found.");
+        }
+        
+        var unit = _unitsService.CreateUpdateUnits(unitId, userId, unitsBodyDto);
+        
+        return Ok(unit);
     }
     
 }
