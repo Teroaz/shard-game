@@ -10,5 +10,5 @@ public interface IUnitsService
     
     Boolean IsBodyValid(string id, string userId, UnitsBodyDto? unitsBodyDto);
     
-    public  List<UnitsModel> GetUnitsByUser(string userId);
+    public  List<UnitsDto> GetUnitsByUser(string userId);
 }

@@ -54,8 +54,8 @@ public class UnitsService : IUnitsService
                _common.IsIdConsistant(userId, "^[a-zA-Z0-9_-]+$");
     }
     
-    public  List<UnitsModel> GetUnitsByUser(string userId)
+    public  List<UnitsDto> GetUnitsByUser(string userId)
     {
-        return _unitsRepository.GetUnitsByUser(userId);
+        return _unitsRepository.GetUnitsByUser(userId).Select(unit => new UnitsDto(unit)).ToList();
     }
 }

@@ -31,6 +31,33 @@ public class UnitsController : ControllerBase
         
         return Ok(units);
     }
+    
+    
+    [HttpGet("/users/{userId}/Units/{unitId}")]
+    public ActionResult<UnitsDto> Get(string unitId, string userId)
+    {
+        var unit = _unitsService.GetUnitByIdAndUser(unitId, userId);
+        
+        if(unit == null)
+        {
+            return NotFound("Not found.");
+        }
+        
+        return Ok(new UnitsDto(unit));
+    }
+    
+    [HttpGet("/users/{userId}/Units/{unitId}/location")]
+    public ActionResult<UnitsLocationDto> GetLocation(string unitId, string userId)
+    {
+        var unit = _unitsService.GetUnitByIdAndUser(unitId, userId);
+        
+        if(unit == null)
+        {
+            return NotFound("Not found.");
+        }
+        
+        return Ok(new UnitsLocationDto(unit));
+    }
 
     [HttpPut("/users/{userId}/Units/{unitId}")]
     public ActionResult<UnitsDto> Put(string unitId, string userId, [FromBody] UnitsBodyDto unitsBodyDto)
@@ -51,8 +78,7 @@ public class UnitsController : ControllerBase
         }
         
         var unit = _unitsService.CreateUpdateUnits(unitId, userId, unitsBodyDto);
-        
-        return Ok(unit);
+        return Ok(new UnitsDto(unit));
     }
     
 }
