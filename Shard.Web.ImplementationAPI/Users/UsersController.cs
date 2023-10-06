@@ -29,7 +29,7 @@ public class UsersController : ControllerBase
         
         if(!isValid)
         {
-            return BadRequest("Something went wrong.");
+            return BadRequest("Bad request.");
         }
         
         var user = _userService.CreateUpdateUser(id, userBody);

@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Shard.Web.ImplementationAPI.Users;
 
 namespace Shard.Web.ImplementationAPI.Units;
 
@@ -7,15 +8,22 @@ public class UnitsController : ControllerBase
 {
     
     private readonly IUnitsService _unitsService;
-    
-    public UnitsController(IUnitsService unitsService)
+    private readonly IUserService _userService;
+    public UnitsController(IUnitsService unitsService, IUserService userService)
     {
         _unitsService = unitsService;
+        _userService = userService;
     }
     
-    [HttpGet("/users/{unitId}/Units")]
-    public ActionResult Get()
+    [HttpGet("/users/{userId}/Units")]
+    public ActionResult Get(string userId)
     {
+        var user = _userService.GetUserById(userId);
+        if (user == null)
+        {
+            return NotFound();
+        }
+        
         return Ok();
     }
     

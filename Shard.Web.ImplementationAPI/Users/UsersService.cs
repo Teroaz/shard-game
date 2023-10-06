@@ -6,6 +6,7 @@ namespace Shard.Web.ImplementationAPI.Users;
 
 public interface IUserService
 {
+    Boolean IsIdConsistant(string id);
     Boolean IsBodyValid(string id, UserBodyDto? userBody);
     UserDto CreateUpdateUser(string id, UserBodyDto userBody);
     UserDto? GetUserById(string id);
@@ -20,6 +21,13 @@ public class UsersService : IUserService
     {
         _userRepository = userRepository;
     }
+
+    public Boolean IsIdConsistant(string id)
+    {
+        var regex = new Regex("^[a-zA-Z0-9_-]+$");
+        
+        return regex.IsMatch(id) && !string.IsNullOrWhiteSpace(id);
+    }
     
     public UserDto? GetUserById(string id)
     {
@@ -30,14 +38,16 @@ public class UsersService : IUserService
     
     public Boolean IsBodyValid(string id, UserBodyDto? userBody)
     {
-        if (userBody == null || string.IsNullOrWhiteSpace(userBody.Id) || id != userBody.Id)
+        if (
+            userBody == null || 
+            id != userBody.Id ||
+            string.IsNullOrWhiteSpace(userBody.Pseudo)
+            )
         {
             return false;
         }
 
-        var regex = new Regex("^[a-zA-Z0-9_-]+$");
-        
-        return regex.IsMatch(id);
+        return IsIdConsistant(userBody.Id);
     }
 
     public UserDto CreateUpdateUser(string id, UserBodyDto userBody)
