@@ -1,15 +1,15 @@
-﻿using Shard.Shared.Core;
+﻿using Shard.Web.ImplementationAPI.Models;
 
 namespace Shard.Web.ImplementationAPI.Systems.DTOs;
 
 public record PlanetDto
 {
-    public string Name { get; init; }
-    public int Size { get; init; }
+    public string Name { get; }
+    public int Size { get; }
 
-    public PlanetDto(PlanetSpecification planetSpecification)
+    public PlanetDto(PlanetModel planetModel)
     {
-        Name = planetSpecification.Name;
-        Size = planetSpecification.Size;
+        Name = planetModel.Name;
+        Size = planetModel.Size;
     }
 }

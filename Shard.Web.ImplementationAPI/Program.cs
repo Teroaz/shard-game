@@ -1,13 +1,41 @@
-namespace Shard.Web.ImplementationAPI;
+using Shard.Shared.Core;
+using Shard.Web.ImplementationAPI.Systems;
 
-public class Program
+var builder = WebApplication.CreateBuilder(args);
+var configuration = builder.Configuration;
+
+builder.Services.AddControllers();
+builder.Services.AddEndpointsApiExplorer();
+
+builder.Services.AddSingleton<ISystemsRepository, SystemsRepository>();
+builder.Services.AddSingleton<ISystemsService, SystemsService>();
+builder.Services.AddSingleton<MapGenerator>(_ =>
 {
-    public static void Main(string[] args)
+    
+    var options = new MapGeneratorOptions
     {
-        CreateHostBuilder(args).Build().Run();
-    }
+        Seed = configuration["MapGenerator:Options:Seed"],
+    };
 
-    private static IHostBuilder CreateHostBuilder(string[] args) =>
-        Host.CreateDefaultBuilder(args)
-            .ConfigureWebHostDefaults(webBuilder => { webBuilder.UseStartup<Startup>(); });
+    return new MapGenerator(options);
+});
+
+var app = builder.Build();
+
+if (app.Environment.IsDevelopment())
+{
+    app.UseDeveloperExceptionPage();
+}
+
+app.UseRouting();
+app.UseEndpoints(endpoints => { endpoints.MapControllers(); });
+
+app.Run();
+
+
+namespace Shard.Web.ImplementationAPI
+{
+    public partial class Program
+    {
+    }
 }

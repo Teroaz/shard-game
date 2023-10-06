@@ -2,12 +2,6 @@
 
 namespace Shard.Web.ImplementationAPI.Systems;
 
-public interface ISystemsService
-{
-    IReadOnlyList<SystemDto> GetAllSystems();
-    SystemDto? GetSystem(string systemName);
-}
-
 public class SystemsService : ISystemsService
 {
     private readonly ISystemsRepository _systemsRepository;

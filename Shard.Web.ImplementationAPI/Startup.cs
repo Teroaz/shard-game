@@ -1,8 +1,5 @@
 ﻿using Shard.Shared.Core;
 using Shard.Web.ImplementationAPI.Systems;
-using Shard.Web.ImplementationAPI.Units;
-using Shard.Web.ImplementationAPI.Users;
-using Shard.Web.ImplementationAPI.Users.Dtos;
 
 namespace Shard.Web.ImplementationAPI;
 
@@ -19,9 +16,6 @@ public class Startup
     {
         services.AddSingleton<ISystemsRepository, SystemsRepository>();
         services.AddSingleton<ISystemsService, SystemsService>();
-        services.AddSingleton<IUnitsService, UnitsService>();
-        services.AddSingleton<IUserService, UsersService>();
-        services.AddSingleton<IUserRepository, UsersRepository>();
         services.AddSingleton<MapGenerator>((_) =>
         {
             var options = new MapGeneratorOptions
