@@ -1,4 +1,5 @@
-﻿using Shard.Web.ImplementationAPI.Systems.DTOs;
+﻿using Shard.Web.ImplementationAPI.Models;
+using Shard.Web.ImplementationAPI.Systems.DTOs;
 
 namespace Shard.Web.ImplementationAPI.Systems;
 
@@ -11,16 +12,15 @@ public class SystemsService : ISystemsService
         _systemsRepository = systemsRepository;
     }
 
-    public IReadOnlyList<SystemDto> GetAllSystems()
+    public IReadOnlyList<SystemModel> GetAllSystems()
     {
         var systems = _systemsRepository.GetAllSystems();
-        return systems.Select(system => new SystemDto(system)).ToList();
+        return systems.ToList();
     }
 
-    public SystemDto? GetSystem(string systemName)
+    public SystemModel? GetSystem(string systemName)
     {
-        var system = _systemsRepository.GetSystem(systemName);
-        return system == null ? null : new SystemDto(system);
+        return _systemsRepository.GetSystem(systemName);
     }
     
 }

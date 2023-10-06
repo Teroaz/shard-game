@@ -8,6 +8,6 @@ public class UnitsBodyDto
     
     public string System { get; init; }
     
-    public string Planet { get; init; }
+    public string? Planet { get; init; }
     
 }

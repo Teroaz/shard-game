@@ -1,4 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
+using Shard.Shared.Core;
+using Shard.Web.ImplementationAPI.Systems;
 using Shard.Web.ImplementationAPI.Units.DTOs;
 using Shard.Web.ImplementationAPI.Users;
 
@@ -11,10 +13,14 @@ public class UnitsController : ControllerBase
     private readonly IUnitsService _unitsService;
     
     private readonly IUserService _userService;
-    public UnitsController(IUnitsService unitsService, IUserService userService)
+    
+    private readonly ISystemsService _systemsService;
+    
+    public UnitsController(IUnitsService unitsService, IUserService userService, ISystemsService systemsService)
     {
         _unitsService = unitsService;
         _userService = userService;
+        _systemsService = systemsService;
     }
     
     [HttpGet("/users/{userId}/Units")]
@@ -56,7 +62,12 @@ public class UnitsController : ControllerBase
             return NotFound("Not found.");
         }
         
-        return Ok(new UnitsLocationDto(unit));
+        var system = _systemsService.GetSystem(unit.System);
+        var planet = system?.Planets.FirstOrDefault(planet => planet.Name == unit.Planet);
+        var resourceQuantity = planet?.ResourceQuantity == null ?  
+            new Dictionary<ResourceKind, int>() : 
+            planet.ResourceQuantity;
+        return Ok(new UnitsLocationDto(unit, resourceQuantity));
     }
 
     [HttpPut("/users/{userId}/Units/{unitId}")]
