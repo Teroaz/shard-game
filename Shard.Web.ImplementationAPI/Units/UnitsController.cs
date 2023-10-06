@@ -26,5 +26,11 @@ public class UnitsController : ControllerBase
         
         return Ok();
     }
+
+    [HttpPut("/users/{userId}/Units/{unitId}")]
+    public ActionResult Put()
+    {
+        return Ok();
+    }
     
 }

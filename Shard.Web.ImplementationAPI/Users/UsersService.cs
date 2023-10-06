@@ -4,22 +4,14 @@ using Shard.Web.ImplementationAPI.Users.Dtos;
 
 namespace Shard.Web.ImplementationAPI.Users;
 
-public interface IUserService
-{
-    Boolean IsIdConsistant(string id);
-    Boolean IsBodyValid(string id, UserBodyDto? userBody);
-    UserDto CreateUpdateUser(string id, UserBodyDto userBody);
-    UserDto? GetUserById(string id);
-}
-
 public class UsersService : IUserService
 {
     
-    private readonly IUserRepository _userRepository; 
+    private readonly IUsersRepository _usersRepository; 
     
-    public UsersService(IUserRepository userRepository)
+    public UsersService(IUsersRepository usersRepository)
     {
-        _userRepository = userRepository;
+        _usersRepository = usersRepository;
     }
 
     public Boolean IsIdConsistant(string id)
@@ -31,7 +23,7 @@ public class UsersService : IUserService
     
     public UserDto? GetUserById(string id)
     {
-        var user = _userRepository.GetUserById(id);
+        var user = _usersRepository.GetUserById(id);
         
         return user == null ? null : new UserDto(user);
     }
@@ -52,11 +44,11 @@ public class UsersService : IUserService
 
     public UserDto CreateUpdateUser(string id, UserBodyDto userBody)
     {
-        var user = _userRepository.GetUserById(id);
+        var user = _usersRepository.GetUserById(id);
         if (user == null)
         {
             user = new UserModel(userBody.Id, userBody.Pseudo, DateTimeOffset.Now.ToString("yyyy-MM-ddTHH:mm:ss.fffK"));
-            _userRepository.AddUser(user);
+            _usersRepository.AddUser(user);
         }
         
         return new UserDto(user);

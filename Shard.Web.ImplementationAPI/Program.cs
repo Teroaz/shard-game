@@ -12,8 +12,9 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSingleton<ISystemsRepository, SystemsRepository>();
 builder.Services.AddSingleton<ISystemsService, SystemsService>();
 builder.Services.AddSingleton<IUnitsService, UnitsService>();
+builder.Services.AddSingleton<IUnitsRepository, UnitsRepository>();
 builder.Services.AddSingleton<IUserService, UsersService>();
-builder.Services.AddSingleton<IUserRepository, UsersRepository>();
+builder.Services.AddSingleton<IUsersRepository, UsersesRepository>();
 builder.Services.AddSingleton<MapGenerator>(_ =>
 {
     
