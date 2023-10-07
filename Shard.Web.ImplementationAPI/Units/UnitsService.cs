@@ -1,8 +1,8 @@
 using System.Text.RegularExpressions;
 using Shard.Web.ImplementationAPI.Models;
-using Shard.Web.ImplementationAPI.Services;
 using Shard.Web.ImplementationAPI.Systems;
 using Shard.Web.ImplementationAPI.Units.DTOs;
+using Shard.Web.ImplementationAPI.Utils;
 
 namespace Shard.Web.ImplementationAPI.Units;
 
@@ -17,17 +17,17 @@ public class UnitsService : IUnitsService
     
     public UnitsService(IUnitsRepository unitsRepository, ICommon common, ISystemsService systemsService)
     {
-        _unitsRepository = unitsRepository;
+        _unitsRepository = unitsRepository; 
         _systemsService = systemsService;
         _common = common;
     }
     
-    public UnitsModel? GetUnitByIdAndUser(string id, string userId)
+    public UnitModel? GetUnitByIdAndUser(string id, string userId)
     {
         return _unitsRepository.GetUnitByIdAndUser(id, userId);
     }
     
-    public UnitsModel CreateUpdateUnits(string id, string userId, UnitsBodyDto unitsBodyDto)
+    public UnitModel CreateUpdateUnits(string id, string userId, UnitsBodyDto unitsBodyDto)
     {
         var unit = _unitsRepository.GetUnitByIdAndUser(id, userId);
         
@@ -51,7 +51,7 @@ public class UnitsService : IUnitsService
             }
             
             
-            unit = new UnitsModel(id, unitsBodyDto.Type, unitsBodyDto.System, planet!, userId);
+            unit = new UnitModel(id, unitsBodyDto.Type, unitsBodyDto.System, planet!, userId);
             
             _unitsRepository.AddUnit(unit);
         }
@@ -67,7 +67,7 @@ public class UnitsService : IUnitsService
         return unit;
     }
 
-    public Boolean IsBodyValid(string id, string userId, UnitsBodyDto? unitsBodyDto)
+    public bool IsBodyValid(string id, string userId, UnitsBodyDto? unitsBodyDto)
     {
         if (
             unitsBodyDto == null || 

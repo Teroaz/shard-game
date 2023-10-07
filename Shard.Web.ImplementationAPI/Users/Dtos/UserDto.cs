@@ -1,4 +1,4 @@
-using Shard.Web.ImplementationAPI.Model;
+using Shard.Web.ImplementationAPI.Models;
 
 namespace Shard.Web.ImplementationAPI.Users.Dtos;
 

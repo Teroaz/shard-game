@@ -1,10 +1,8 @@
-using System.Text.RegularExpressions;
-using Shard.Web.ImplementationAPI.Model;
 using Shard.Web.ImplementationAPI.Models;
-using Shard.Web.ImplementationAPI.Services;
 using Shard.Web.ImplementationAPI.Systems;
 using Shard.Web.ImplementationAPI.Units;
 using Shard.Web.ImplementationAPI.Users.Dtos;
+using Shard.Web.ImplementationAPI.Utils;
 
 namespace Shard.Web.ImplementationAPI.Users;
 
@@ -23,13 +21,6 @@ public class UsersService : IUserService
         _unitsRepository = unitsRepository;
         _common = common;
     }
-
-    public Boolean IsIdConsistant(string id)
-    {
-        var regex = new Regex("^[a-zA-Z0-9_-]+$");
-        
-        return regex.IsMatch(id) && !string.IsNullOrWhiteSpace(id);
-    }
     
     public UserDto? GetUserById(string id)
     {
@@ -37,8 +28,8 @@ public class UsersService : IUserService
         
         return user == null ? null : new UserDto(user);
     }
-    
-    public Boolean IsBodyValid(string id, UserBodyDto? userBody)
+
+    public bool IsBodyValid(string id, UserBodyDto? userBody)
     {
         if (
             userBody == null || 
@@ -67,7 +58,7 @@ public class UsersService : IUserService
             var randomPlanet = randomSystem.Planets[random.Next(randomSystem.Planets.Count)];
             
             _usersRepository.AddUser(user);
-            _unitsRepository.AddUnit(new UnitsModel(Guid.NewGuid().ToString(), "scout", randomSystem.Name, randomPlanet.Name, user.Id));
+            _unitsRepository.AddUnit(new UnitModel(Guid.NewGuid().ToString(), "scout", randomSystem.Name, randomPlanet.Name, user.Id));
             
         }
         else

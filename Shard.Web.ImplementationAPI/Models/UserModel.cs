@@ -1,4 +1,4 @@
-namespace Shard.Web.ImplementationAPI.Model;
+namespace Shard.Web.ImplementationAPI.Models;
 
 public class UserModel
 {

@@ -1,6 +1,6 @@
 namespace Shard.Web.ImplementationAPI.Models;
 
-public class UnitsModel
+public class UnitModel
 {
     public string Id { get; set; }
     
@@ -12,7 +12,7 @@ public class UnitsModel
     
     public string UserId { get; set; }
     
-    public UnitsModel(string id, string type, string system, string planet, string userId)
+    public UnitModel(string id, string type, string system, string planet, string userId)
     {
         Id = id;
         Type = type;

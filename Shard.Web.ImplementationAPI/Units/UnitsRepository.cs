@@ -4,19 +4,19 @@ namespace Shard.Web.ImplementationAPI.Units;
 
 public class UnitsRepository : IUnitsRepository
 {
-    private readonly List<UnitsModel> _units = new List<UnitsModel>();
+    private readonly List<UnitModel> _units = new List<UnitModel>();
     
-    public UnitsModel? GetUnitByIdAndUser(string id, string userId)
+    public UnitModel? GetUnitByIdAndUser(string id, string userId)
     {
         return _units.FirstOrDefault(unit => unit.Id == id && unit.UserId == userId);
     }
     
-    public void AddUnit(UnitsModel unit)
+    public void AddUnit(UnitModel unit)
     {
         _units.Add(unit);
     }
     
-    public  List<UnitsModel> GetUnitsByUser(string userId)
+    public  List<UnitModel> GetUnitsByUser(string userId)
     {
         return _units.Where(unit => unit.UserId == userId).ToList();
     }

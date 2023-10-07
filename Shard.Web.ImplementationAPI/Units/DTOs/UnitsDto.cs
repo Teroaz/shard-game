@@ -12,11 +12,11 @@ public class UnitsDto
     
     public string Planet { get; init; }
     
-    public UnitsDto (UnitsModel unitsModel)
+    public UnitsDto (UnitModel unitModel)
     {
-        Id = unitsModel.Id;
-        Type = unitsModel.Type;
-        System = unitsModel.System;
-        Planet = unitsModel.Planet;
+        Id = unitModel.Id;
+        Type = unitModel.Type;
+        System = unitModel.System;
+        Planet = unitModel.Planet;
     }
 }

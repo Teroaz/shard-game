@@ -11,10 +11,10 @@ public class UnitsLocationDto
     
     public IReadOnlyDictionary<ResourceKind, int>? ResourcesQuantity { get; } 
 
-    public UnitsLocationDto(UnitsModel unitsModel, IReadOnlyDictionary<ResourceKind, int>? resourceQuantity)
+    public UnitsLocationDto(UnitModel unitModel, IReadOnlyDictionary<ResourceKind, int>? resourceQuantity)
     {
-        System = unitsModel.System;
-        Planet = unitsModel.Planet;
+        System = unitModel.System;
+        Planet = unitModel.Planet;
         ResourcesQuantity = resourceQuantity ?? new Dictionary<ResourceKind, int>();
     }
     
