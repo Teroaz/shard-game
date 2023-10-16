@@ -15,7 +15,7 @@ public class SystemsController : ControllerBase
     }
 
     [HttpGet]
-    public ActionResult<List<SystemDto>> Get()
+    public ActionResult<IReadOnlyList<SystemDto>> Get()
     {
         var systems = _systemsService.GetAllSystems();
         return Ok(systems.Select(s => new SystemDto(s)).ToList());
