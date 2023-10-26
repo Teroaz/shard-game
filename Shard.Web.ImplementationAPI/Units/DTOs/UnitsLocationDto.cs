@@ -7,15 +7,15 @@ public class UnitsLocationDto
 {
     public string System {get; init; }
 
-    public string Planet {get; init; }
+    public string? Planet {get; init; }
     
     public IReadOnlyDictionary<ResourceKind, int>? ResourcesQuantity { get; } 
 
     public UnitsLocationDto(UnitModel unitModel, IReadOnlyDictionary<ResourceKind, int>? resourceQuantity)
     {
-        System = unitModel.System;
-        Planet = unitModel.Planet;
-        ResourcesQuantity = resourceQuantity ?? new Dictionary<ResourceKind, int>();
+        System = unitModel.System.Name;
+        Planet = unitModel.Planet?.Name;
+        ResourcesQuantity = resourceQuantity;
     }
     
 }

@@ -4,9 +4,13 @@ namespace Shard.Web.ImplementationAPI.Units;
 
 public interface IUnitsRepository
 {
-    UnitModel? GetUnitByIdAndUser(string id, string userId);
-    
-    List<UnitModel> GetUnitsByUser(string userId);
-    
-    void AddUnit(UnitModel unit);
+    UnitModel? GetUnitByIdAndUser(UserModel user, string userId);
+
+    List<UnitModel> GetUnitsByUser(UserModel user);
+
+    void AddUnit(UserModel user, UnitModel unit);
+
+    void RemoveUnit(UserModel user, UnitModel unit);
+
+    void UpdateUnit(UserModel user, UnitModel unit);
 }

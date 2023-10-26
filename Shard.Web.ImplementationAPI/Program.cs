@@ -1,5 +1,6 @@
 using System.Text.Json;
 using Shard.Shared.Core;
+using Shard.Web.ImplementationAPI.Buildings;
 using Shard.Web.ImplementationAPI.Systems;
 using Shard.Web.ImplementationAPI.Units;
 using Shard.Web.ImplementationAPI.Users;
@@ -15,20 +16,22 @@ builder.Services.AddEndpointsApiExplorer();
 
 builder.Services.AddSingleton<ISystemsRepository, SystemsRepository>();
 builder.Services.AddSingleton<ISystemsService, SystemsService>();
-builder.Services.AddSingleton<IUnitsService, UnitsService>();
-builder.Services.AddSingleton<IUnitsRepository, UnitsRepository>();
-builder.Services.AddSingleton<IUserService, UsersService>();
-builder.Services.AddSingleton<IUsersRepository, UsersRepository>();
-builder.Services.AddSingleton<ICommon, Common>();
-builder.Services.AddSingleton<MapGenerator>(_ =>
-{
-    var options = new MapGeneratorOptions
-    {
-        Seed = configuration["MapGenerator:Options:Seed"],
-    };
 
-    return new MapGenerator(options);
-});
+builder.Services.AddSingleton<IUnitsRepository, UnitsRepository>();
+builder.Services.AddSingleton<IUnitsService, UnitsService>();
+
+builder.Services.AddSingleton<IUsersRepository, UsersRepository>();
+builder.Services.AddSingleton<IUsersService, UsersService>();
+
+builder.Services.AddSingleton<IBuildingsRepository, BuildingsRepository>();
+builder.Services.AddSingleton<IBuildingsService, BuildingsService>();
+
+builder.Services.AddSingleton<ICommon, Common>();
+builder.Services.AddSingleton<IClock, SystemClock>();
+
+builder.Services.Configure<MapGeneratorOptions>(options => options.Seed = configuration["MapGenerator:Options:Seed"]);
+builder.Services.AddSingleton<MapGenerator>();
+
 
 var app = builder.Build();
 
