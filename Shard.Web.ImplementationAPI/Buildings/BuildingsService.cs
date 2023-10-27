@@ -10,11 +10,7 @@ public class BuildingsService : IBuildingsService
     {
         _buildingsRepository = buildingsRepository;
     }
-
-    public static List<string> GetBuildingTypes() => new() { "mine" };
-
-    public bool IsBuildingTypeValid(string buildingType) => GetBuildingTypes().Contains(buildingType);
-
+    
     public BuildingModel? GetBuildingByIdAndUser(UserModel user, string id)
     {
         return _buildingsRepository.GetBuildingByIdAndUser(user, id);

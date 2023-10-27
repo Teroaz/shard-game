@@ -19,6 +19,8 @@ public class UnitModel
 
     public DateTime EstimatedArrivalTime { get; set; }
 
+    public Task? MoveTask { get; private set; }
+
     public UnitModel(UnitType type, SystemModel system, PlanetModel? planet)
         : this(Guid.NewGuid().ToString(), type, system, planet)
     {
@@ -52,12 +54,12 @@ public class UnitModel
         DestinationSystem = destinationSystem;
         DestinationPlanet = destinationPlanet;
         EstimatedArrivalTime = now.Add(timeToMove);
-
-        clock.CreateTimer(state =>
+        
+        MoveTask = clock.Delay(timeToMove).ContinueWith(t =>
         {
-            var unit = (UnitModel)state!;
-            System = unit.DestinationSystem;
-            Planet = unit.DestinationPlanet;
-        }, this, timeToMove, new TimeSpan());
+            System = DestinationSystem;
+            Planet = DestinationPlanet;
+            MoveTask = null; // Réinitialiser MoveTask une fois le déplacement terminé
+        });
     }
 }

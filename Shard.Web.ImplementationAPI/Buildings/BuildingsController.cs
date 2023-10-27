@@ -34,13 +34,11 @@ public class BuildingsController : ControllerBase
             return BadRequest();
         }
 
-        if (!_buildingsService.IsBuildingTypeValid(createBuildingBodyDto.Type)) return BadRequest();
+        if (!createBuildingBodyDto.Type.IsValidBuildingType()) return BadRequest();
 
         var unit = _unitsService.GetUnitByIdAndUser(user, createBuildingBodyDto.BuilderId);
         if (unit?.Planet == null) return BadRequest();
-
-        if (!createBuildingBodyDto.Type.IsValidBuildingType()) return BadRequest();
-
+        
         var building = new BuildingModel(createBuildingBodyDto.Id, createBuildingBodyDto.Type.ToBuildingType(), unit.System, unit.Planet);
 
         _buildingsService.AddBuilding(user, building);

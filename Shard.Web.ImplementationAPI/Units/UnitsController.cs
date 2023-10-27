@@ -63,10 +63,15 @@ public class UnitsController : ControllerBase
 
         if (timeLeft.TotalSeconds is > 0 and <= 2)
         {
-            await _clock.Delay(timeLeft);
+            if (unit.MoveTask != null)
+            {
+                await unit.MoveTask;
+            }
+
+            return new UnitsDto(unit);
         }
 
-        return Ok(new UnitsDto(unit));
+        return new UnitsDto(unit);
     }
 
     [HttpGet("{unitId}/location")]

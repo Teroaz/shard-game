@@ -4,8 +4,6 @@ namespace Shard.Web.ImplementationAPI.Buildings;
 
 public interface IBuildingsService
 {
-    bool IsBuildingTypeValid(string buildingType);
-
     BuildingModel? GetBuildingByIdAndUser(UserModel user, string id);
 
     List<BuildingModel> GetBuildingsByUser(UserModel user);
