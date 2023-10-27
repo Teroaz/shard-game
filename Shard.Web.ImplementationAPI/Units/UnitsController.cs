@@ -120,6 +120,7 @@ public class UnitsController : ControllerBase
         else
         {
             var oldUnit = _unitsService.GetUnitByIdAndUser(user, unitId);
+            if (oldUnit == null) return NotFound();
             oldUnit.DestinationSystem = destinationSystem;
             oldUnit.DestinationPlanet = destinationPlanet;
 
