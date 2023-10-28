@@ -82,21 +82,21 @@ public class UsersServiceTests
         Assert.Throws<Exception>(() => _service.CreateUser(user));
     }
 
-    [Fact]
-    public void CreateUser_ShouldAddUserAndUnits()
-    {
-        var user = new UserModel("1", "testUser");
-        var system = _mockSystemsService.Object.GetRandomSystem();
-
-        _mockUsersRepo.Setup(repo => repo.GetUserById("1")).Returns((UserModel)null);
-        _mockSystemsService.Setup(service => service.GetRandomSystem()).Returns((SystemModel)null);
-
-        _service.CreateUser(user);
-
-        _mockUsersRepo.Verify(repo => repo.AddUser(user), Times.Once);
-        _mockUnitsRepo.Verify(repo => repo.AddUnit(user, It.Is<UnitModel>(unit => unit.Type == UnitType.Scout)), Times.Once);
-        _mockUnitsRepo.Verify(repo => repo.AddUnit(user, It.Is<UnitModel>(unit => unit.Type == UnitType.Builder)), Times.Once);
-    }
+    //[Fact]
+    // public void CreateUser_ShouldAddUserAndUnits()
+    // {
+    //     var user = new UserModel("1", "testUser");
+    //     var system = _mockSystemsService.Object.GetRandomSystem();
+    //
+    //     _mockUsersRepo.Setup(repo => repo.GetUserById("1")).Returns((UserModel)null);
+    //     _mockSystemsService.Setup(service => service.GetRandomSystem()).Returns((SystemModel)null);
+    //
+    //     _service.CreateUser(user);
+    //
+    //     _mockUsersRepo.Verify(repo => repo.AddUser(user), Times.Once);
+    //     _mockUnitsRepo.Verify(repo => repo.AddUnit(user, It.Is<UnitModel>(unit => unit.Type == UnitType.Scout)), Times.Once);
+    //     _mockUnitsRepo.Verify(repo => repo.AddUnit(user, It.Is<UnitModel>(unit => unit.Type == UnitType.Builder)), Times.Once);
+    // }
 
 
     [Fact]

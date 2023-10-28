@@ -9,20 +9,15 @@ namespace Shard.Web.ImplementationAPI.Units;
 public class UnitsService : IUnitsService
 {
     private readonly IUnitsRepository _unitsRepository;
-
-    private readonly ISystemsService _systemsService;
+    
 
     private readonly ICommon _common;
+    
 
-    private readonly IUsersService _usersService;
-
-    public UnitsService(IUnitsRepository unitsRepository, ICommon common, ISystemsService systemsService,
-        IUsersService usersService)
+    public UnitsService(IUnitsRepository unitsRepository, ICommon common)
     {
         _unitsRepository = unitsRepository;
-        _systemsService = systemsService;
         _common = common;
-        _usersService = usersService;
     }
 
     public UnitModel? GetUnitByIdAndUser(UserModel user, string id)
