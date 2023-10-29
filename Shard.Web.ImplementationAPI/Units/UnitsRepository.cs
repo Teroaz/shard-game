@@ -8,6 +8,7 @@ public class UnitsRepository : IUnitsRepository
 
     public UnitModel? GetUnitByIdAndUser(UserModel user, string id)
     {
+        if (!_units.ContainsKey(user)) return null;
         return _units[user].FirstOrDefault(unit => unit.Id == id);
     }
 

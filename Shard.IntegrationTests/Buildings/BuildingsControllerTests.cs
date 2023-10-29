@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Moq;
+using Shard.Shared.Core;
 using Shard.Web.ImplementationAPI.Buildings;
 using Shard.Web.ImplementationAPI.Buildings.DTOs;
 using Shard.Web.ImplementationAPI.Models;
@@ -58,4 +59,68 @@ public class BuildingsControllerTests
         // Assert
         Assert.IsType<BadRequestResult>(result.Result);
     }
+    
+    [Fact]
+    public void CreateBuilding_ReturnsBadRequest_WhenBuildingTypeIsInvalid()
+    {
+        // Arrange
+        var userId = "invalidTypeUserId";
+        var user = new UserModel("userWithInvalidType");
+        _mockUserService.Setup(s => s.GetUserById(userId)).Returns(user);
+
+        // Act
+        var result = _controller.CreateBuilding(userId, new CreateBuildingBodyDto("1", "InvalidType", "BuilderId"));
+
+        // Assert
+        Assert.IsType<BadRequestResult>(result.Result);
+    }
+
+    [Fact]
+    public void CreateBuilding_ReturnsBadRequest_WhenBuilderIdIsInvalidOrUnitHasNoPlanet()
+    {
+        // Arrange
+        var userId = "validUserButInvalidUnitId";
+        var user = new UserModel("userWithInvalidUnitId");
+        _mockUserService.Setup(s => s.GetUserById(userId)).Returns(user);
+        _mockUnitsService.Setup(s => s.GetUnitByIdAndUser(user, "BuilderId")).Returns((UnitModel)null);
+
+        // Act
+        var result = _controller.CreateBuilding(userId, new CreateBuildingBodyDto("1", "Type", "BuilderId"));
+
+        // Assert
+        Assert.IsType<BadRequestResult>(result.Result);
+    }
+
+    [Fact]
+    public void CreateBuilding_ReturnsBuildingDto_WhenAllConditionsAreMet()
+    {
+        // Arrange
+        var userId = "someUserId";
+        var user = new UserModel("someUser");
+
+        var options = new MapGeneratorOptions { Seed = "TestSeed" };
+        var mapGenerator = new MapGenerator(options);
+        var sectorSpecification = mapGenerator.Generate();
+
+        _mockSystemsService.Setup(m => m.GetRandomSystem()).Returns(new SystemModel(sectorSpecification.Systems[0]));
+        _mockSystemsService.Setup(m => m.GetRandomPlanet(It.IsAny<SystemModel>()))
+            .Returns(new PlanetModel(sectorSpecification.Systems[0].Planets[0]));
+        
+        var unit = new UnitModel(UnitType.Builder, _mockSystemsService.Object.GetRandomSystem(), _mockSystemsService.Object.GetRandomPlanet(It.IsAny<SystemModel>()));
+        _mockUserService.Setup(s => s.GetUserById(userId)).Returns(user);
+        _mockUnitsService.Setup(u => u.GetUnitByIdAndUser(user, "BuilderId")).Returns(unit);
+
+        // Act
+        var result = _controller.CreateBuilding(userId, new CreateBuildingBodyDto("1", BuildingType.Mine.ToLowerString(), "BuilderId"));
+
+        // Assert
+        Assert.IsType<BuildingDto>(result.Value);
+        Assert.Equal("1", result.Value.Id);
+        Assert.Equal(BuildingType.Mine.ToLowerString(), result.Value.Type);
+        Assert.Equal(unit.System.Name, result.Value.System);
+        Assert.Equal(unit.Planet?.Name, result.Value.Planet);
+        
+    }
+
+    
 }

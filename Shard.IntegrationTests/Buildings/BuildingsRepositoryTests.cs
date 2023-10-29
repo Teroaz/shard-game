@@ -53,6 +53,13 @@ public class BuildingsRepositoryTests
 
             // Assert
             Assert.Equal(building2, result);
+            
+            // Act
+            var fakeUser = new UserModel("FakeUser");
+            var fakeResult = repo.GetBuildingByIdAndUser(fakeUser, "2");
+            
+            // Assert
+            Assert.Null(fakeResult);
         }
 
         [Fact]
@@ -71,6 +78,10 @@ public class BuildingsRepositoryTests
 
             // Assert
             Assert.Empty(result);
+            
+            // Act
+            var fakeUser = new UserModel("FakeUser");
+            repo.RemoveBuilding(fakeUser, building);
         }
 
         [Fact]
@@ -90,5 +101,13 @@ public class BuildingsRepositoryTests
 
             // Assert
             Assert.Equal(BuildingType.Mine, result?.Type);
+            
+            // Act
+            var fakeUser = new UserModel("FakeUser");
+            repo.UpdateBuilding(fakeUser, updatedBuilding);
+            
+            // Assert 
+            // Will do nothing if user does not exist
+            
         }
 }

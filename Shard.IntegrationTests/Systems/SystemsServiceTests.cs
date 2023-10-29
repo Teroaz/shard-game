@@ -66,4 +66,29 @@ public class SystemsServiceTests
         Assert.Null(randomSystem);
     }
     
+    [Fact]
+    public void GetRandomSystem_ReturnsRandomSystem_WhenSystemsAreAvailable()
+    {
+        var randomSystem = _service.GetRandomSystem();
+        Assert.NotNull(randomSystem);
+    }
+    
+    [Fact]
+    public void GetRandomPlanet_ReturnsNull_WhenNoPlanetsAreAvailable()
+    {
+        var system = _service.GetRandomSystem()!;
+        system.Planets.Clear();
+        _mockRepo.Setup(r => r.GetSystem(system.Name)).Returns(system);
+
+        var randomPlanet = _service.GetRandomPlanet(system);
+        Assert.Null(randomPlanet);
+    }
+    
+    [Fact]
+    public void GetRandomPlanet_ReturnsRandomPlanet_WhenPlanetsAreAvailable()
+    {
+        var system = _service.GetRandomSystem()!;
+        var randomPlanet = _service.GetRandomPlanet(system);
+        Assert.NotNull(randomPlanet);
+    }
 }

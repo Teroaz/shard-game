@@ -67,6 +67,11 @@ public class UnitsRepositoryTests
         // Assert
         var retrievedUnit = repository.GetUnitByIdAndUser(user, "TestUnit");
         Assert.Null(retrievedUnit);
+        
+        // Assert
+        var fakeUser = new UserModel("FakeUser");
+        repository.RemoveUnit(fakeUser, unit);
+        Assert.DoesNotContain(unit, repository.GetUnitsByUser(user));
     }
 
     [Fact]
@@ -85,5 +90,12 @@ public class UnitsRepositoryTests
         // Assert
         var retrievedUnit = repository.GetUnitByIdAndUser(user, "TestUnit");
         Assert.Equal(UnitType.Builder, retrievedUnit?.Type);
+        
+        // Assert
+        var fakeUser = new UserModel("FakeUser");
+        repository.UpdateUnit(fakeUser, updatedUnit);
+        var retrievedUnit2 = repository.GetUnitByIdAndUser(fakeUser, "TestUnit");   
+        Assert.Null(retrievedUnit2);
+        
     }
 }
