@@ -15,89 +15,104 @@ public class UnitsControllerTests
     private readonly Mock<IUsersService> _mockUsersService;
     private readonly Mock<ISystemsService> _mockSystemsService;
     private readonly Mock<IClock> _mockClock;
+    private readonly MapGenerator _mapGenerator;
     private readonly UnitsController _unitsController;
+    private const string TestSeed = "testSeed";
 
     public UnitsControllerTests()
     {
+        var options = new MapGeneratorOptions { Seed = TestSeed };
         _mockUnitsService = new Mock<IUnitsService>();
         _mockUsersService = new Mock<IUsersService>();
         _mockSystemsService = new Mock<ISystemsService>();
         _mockClock = new Mock<IClock>();
+        _mapGenerator = new MapGenerator(options);
         _unitsController = new UnitsController(
             _mockUnitsService.Object,
             _mockUsersService.Object,
             _mockSystemsService.Object,
             _mockClock.Object
         );
-        _mockSystemsService.Setup(m => m.GetRandomSystem());
+        _mockSystemsService
+            .Setup(m => m.GetRandomSystem())
+            .Returns(new SystemModel(_mapGenerator.Generate().Systems[0]))
+            ;
+        
+        var system = _mockSystemsService.Object.GetRandomSystem()!;
+        _mockSystemsService
+            .Setup(m => m.GetRandomPlanet(system))
+            .Returns(system.Planets[0])
+            ;
     }
 
-    // [Fact]
-    // public void Get_ShouldReturnUnitsForUser()
-    // {
-    //     // Arrange
-    //     var userId = "TestUserId";
-    //     var user = new UserModel("TestUser");
-    //     _mockUsersService.Setup(service => service.GetUserById(userId)).Returns(user);
-    //     var units = new List<UnitModel>
-    //     {
-    //         new UnitModel("TestUnit", UnitType.Scout, _mockSystemsService.Object.GetRandomSystem()!, null)
-    //     };
-    //     
-    //     _mockUnitsService.Setup(service => service.GetUnitsByUser(user)).Returns(units);
-    //
-    //     // Act
-    //     var result = _unitsController.Get(userId);
-    //
-    //     // Assert
-    //     var okResult = Assert.IsType<OkObjectResult>(result.Result);
-    //     var returnedUnits = Assert.IsType<List<UnitsDto>>(okResult.Value);
-    //     Assert.Single(returnedUnits);
-    // }
+    [Fact]
+    public void Get_ShouldReturnUnitsForUser()
+    {
+        // Arrange
+        var userId = "TestUserId";
+        var user = new UserModel("TestUser");
+        _mockUsersService.Setup(service => service.GetUserById(userId)).Returns(user);
+        var system = _mockSystemsService.Object.GetRandomSystem()!;
+        var units = new List<UnitModel>
+        {
+            new UnitModel("TestUnit", UnitType.Scout, system, _mockSystemsService.Object.GetRandomPlanet(system))
+        };
+        
+        _mockUnitsService.Setup(service => service.GetUnitsByUser(user)).Returns(units);
+    
+        // Act
+        var result = _unitsController.Get(userId);
+    
+        // Assert
+        var okResult = Assert.IsType<OkObjectResult>(result.Result);
+        var returnedUnits = Assert.IsType<List<UnitsDto>>(okResult.Value);
+        Assert.Single(returnedUnits);
+    }
 
-    // [Fact]
+    //[Fact]
     // public async Task Get_WithUnitId_ShouldReturnUnitForUser()
     // {
     //     // Arrange
     //     var userId = "TestUserId";
     //     var user = new UserModel("TestUser");
-    //     var unit = new UnitModel("TestUnit", UnitType.Scout, _mockSystemsService.Object.GetRandomSystem()!, null);
+    //     var system = _mockSystemsService.Object.GetRandomSystem()!;
+    //     var unit = new UnitModel("TestUnit", UnitType.Scout, system, _mockSystemsService.Object.GetRandomPlanet(system));
     //     _mockUsersService.Setup(service => service.GetUserById(userId)).Returns(user);
     //     _mockUnitsService.Setup(service => service.GetUnitByIdAndUser(user, "TestUnit")).Returns(unit);
     //
     //     // Act
-    //     var result = await _unitsController.Get(userId, "TestUnit");
+    //     var result = await _unitsController.Get(userId, unit.Id);
     //
     //     // Assert
-    //     var okResult = Assert.IsType<OkObjectResult>(result.Result);
-    //     var returnedUnit = Assert.IsType<UnitsDto>(okResult.Value);
+    //     Assert.IsType<OkObjectResult>(result.Result);
     // }
-    //
-    // [Fact]
-    // public void GetLocation_ShouldReturnUnitLocationForUser()
-    // {
-    //     // Arrange
-    //     var userId = "TestUserId";
-    //     var user = new UserModel("TestUser");
-    //     var unit = new UnitModel("TestUnit", UnitType.Scout, _mockSystemsService.Object.GetRandomSystem()!, null);
-    //     _mockUsersService.Setup(service => service.GetUserById(userId)).Returns(user);
-    //     _mockUnitsService.Setup(service => service.GetUnitByIdAndUser(user, "TestUnit")).Returns(unit);
-    //
-    //     // Act
-    //     var result = _unitsController.GetLocation("TestUnit", userId);
-    //
-    //     // Assert
-    //     var okResult = Assert.IsType<OkObjectResult>(result.Result);
-    //     var returnedLocation = Assert.IsType<UnitsLocationDto>(okResult.Value);
-    // }
-    //
+    
+    [Fact]
+    public void GetLocation_ShouldReturnUnitLocationForUser()
+    {
+        // Arrange
+        var userId = "TestUserId";
+        var user = new UserModel("TestUser");
+        var system = _mockSystemsService.Object.GetRandomSystem()!;
+        var unit = new UnitModel("TestUnit", UnitType.Scout, system, _mockSystemsService.Object.GetRandomPlanet(system));
+        _mockUsersService.Setup(service => service.GetUserById(userId)).Returns(user);
+        _mockUnitsService.Setup(service => service.GetUnitByIdAndUser(user, "TestUnit")).Returns(unit);
+    
+        // Act
+        var result = _unitsController.GetLocation(unit.Id, userId);
+    
+        // Assert
+        Assert.IsType<OkObjectResult>(result.Result);
+    }
+    
     // [Fact]
     // public void Put_ShouldUpdateUnitForUser()
     // {
     //     // Arrange
     //     var userId = "TestUserId";
     //     var user = new UserModel("TestUser");
-    //     var unit = new UnitModel("TestUnit", UnitType.Scout, _mockSystemsService.Object.GetRandomSystem()!, null);
+    //     var system = _mockSystemsService.Object.GetRandomSystem()!;
+    //     var unit = new UnitModel("TestUnit", UnitType.Scout, system, _mockSystemsService.Object.GetRandomPlanet(system));
     //     var unitsBodyDto = new UnitsBodyDto
     //     {
     //         Id = "TestUnit",
