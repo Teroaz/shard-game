@@ -1,3 +1,5 @@
+using Shard.Shared.Core;
+
 namespace Shard.Web.ImplementationAPI.Models;
 
 public class UserModel
@@ -8,15 +10,15 @@ public class UserModel
 
     public DateTime DateOfCreation { get; set; }
 
+    public Dictionary<ResourceKind, int> ResourcesQuantity { get; }
+
+
     public UserModel(string pseudo) : this(Guid.NewGuid().ToString(), pseudo)
     {
     }
 
-    public UserModel(string id, string pseudo)
+    public UserModel(string id, string pseudo) : this(id, pseudo, DateTime.Now)
     {
-        Id = id;
-        Pseudo = pseudo;
-        DateOfCreation = DateTime.Now;
     }
 
     public UserModel(string id, string pseudo, DateTime dateOfCreation)
@@ -24,6 +26,16 @@ public class UserModel
         Id = id;
         Pseudo = pseudo;
         DateOfCreation = dateOfCreation;
+        ResourcesQuantity = new Dictionary<ResourceKind, int>
+        {
+            { ResourceKind.Gold, 0 },
+            { ResourceKind.Aluminium, 0 },
+            { ResourceKind.Carbon, 20 },
+            { ResourceKind.Iron, 10 },
+            { ResourceKind.Oxygen, 50 },
+            { ResourceKind.Titanium, 0 },
+            { ResourceKind.Water, 50 },   
+        };
     }
 
     public override bool Equals(object? obj)

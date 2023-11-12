@@ -4,6 +4,7 @@ using Shard.Web.ImplementationAPI.Models;
 using Shard.Web.ImplementationAPI.Systems;
 using Shard.Web.ImplementationAPI.Units.DTOs;
 using Shard.Web.ImplementationAPI.Users;
+using Shard.Web.ImplementationAPI.Utils;
 
 namespace Shard.Web.ImplementationAPI.Units;
 
@@ -109,9 +110,9 @@ public class UnitsController : ControllerBase
 
         var unit = _unitsService.GetUnitByIdAndUser(user, unitId);
 
-        if (!unitsBodyDto.Type.IsValidUnitType()) return BadRequest();
+        if (!unitsBodyDto.Type.IsValidEnumValue<UnitType>()) return BadRequest();
 
-        var newUnit = new UnitModel(unitId, unitsBodyDto.Type.ToUnitType(), destinationSystem, destinationPlanet);
+        var newUnit = new UnitModel(unitId, unitsBodyDto.Type.ToEnum<UnitType>(), destinationSystem, destinationPlanet);
 
         if (unit == null)
         {
