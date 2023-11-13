@@ -1,4 +1,5 @@
 using Shard.Web.ImplementationAPI.Buildings;
+using Shard.Web.ImplementationAPI.Utils;
 
 namespace Shard.IntegrationTests.Buildings;
 
@@ -23,7 +24,7 @@ public class BuildingTypeExtensionsTests
     public void IsValidBuildingType_ShouldReturnExpectedResult(string type, bool expected)
     {
         // Act
-        var result = type.IsValidBuildingType();
+        var result = type.IsValidEnumValue<BuildingType>();
 
         // Assert
         Assert.Equal(expected, result);
@@ -35,7 +36,7 @@ public class BuildingTypeExtensionsTests
     public void ToBuildingType_ShouldReturnBuildingType(string type, BuildingType expected)
     {
         // Act
-        var result = type.ToBuildingType();
+        var result = type.ToEnum<BuildingType>();
 
         // Assert
         Assert.Equal(expected, result);
@@ -47,7 +48,7 @@ public class BuildingTypeExtensionsTests
     public void ToBuildingType_ShouldThrowArgumentException(string type)
     {
         // Act & Assert
-        var ex = Assert.Throws<ArgumentException>(() => type.ToBuildingType());
+        var ex = Assert.Throws<ArgumentException>(() => type.ToEnum<BuildingType>());
         Assert.Contains($"Invalid unit type: {type}", ex.Message);
     }
 }

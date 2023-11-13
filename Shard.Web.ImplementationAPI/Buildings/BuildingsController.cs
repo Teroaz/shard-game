@@ -56,7 +56,7 @@ public class BuildingsController : ControllerBase
         _buildingsService.AddBuilding(user, building);
 
         building.StartConstruction(_clock);
-
+        
         return new BuildingDto(building);
     }
 

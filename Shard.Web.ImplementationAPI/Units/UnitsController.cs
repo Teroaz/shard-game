@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Shard.Shared.Core;
+using Shard.Web.ImplementationAPI.Buildings;
 using Shard.Web.ImplementationAPI.Models;
 using Shard.Web.ImplementationAPI.Systems;
 using Shard.Web.ImplementationAPI.Units.DTOs;
@@ -18,13 +19,16 @@ public class UnitsController : ControllerBase
 
     private readonly ISystemsService _systemsService;
 
+    private readonly IBuildingsService _buildingsService;
+
     private readonly IClock _clock;
 
-    public UnitsController(IUnitsService unitsService, IUsersService userService, ISystemsService systemsService, IClock clock)
+    public UnitsController(IUnitsService unitsService, IUsersService userService, ISystemsService systemsService, IBuildingsService buildingsService, IClock clock)
     {
         _unitsService = unitsService;
         _userService = userService;
         _systemsService = systemsService;
+        _buildingsService = buildingsService;
         _clock = clock;
     }
 
@@ -124,9 +128,21 @@ public class UnitsController : ControllerBase
             if (oldUnit == null) return NotFound();
             oldUnit.DestinationSystem = destinationSystem;
             oldUnit.DestinationPlanet = destinationPlanet;
-
+            
             _unitsService.UpdateUnit(user, oldUnit);
             oldUnit.Move(_clock, destinationSystem, destinationPlanet);
+            
+            if (unitsBodyDto.DestinationSystem != unitsBodyDto.System || unitsBodyDto.DestinationPlanet != unitsBodyDto.Planet)
+            {
+                var userBuildings = _buildingsService.GetBuildingsByUser(user).ToArray();
+                foreach (var building in userBuildings)
+                {
+                    if (building.System.Name != unitsBodyDto.System || building.Planet.Name != unitsBodyDto.Planet) continue;
+                    building.CancellationTokenSource.Cancel();
+                    _buildingsService.RemoveBuilding(user, building);
+                }
+            }
+            
             newUnit = oldUnit;
         }
 

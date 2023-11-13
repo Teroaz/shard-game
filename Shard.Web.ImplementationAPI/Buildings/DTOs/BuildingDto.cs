@@ -9,6 +9,9 @@ public class BuildingDto
     public string Type { get; set; }
     public string System { get; set; }
     public string Planet { get; set; }
+    public DateTime EstimatedBuildTime { get; set; }
+    public bool IsBuilt { get; set; }
+    public string ResourceCategory { get; set; }
 
     public BuildingDto(BuildingModel buildingModel)
     {
@@ -16,5 +19,8 @@ public class BuildingDto
         Type = buildingModel.Type.ToLowerString();
         System = buildingModel.System.Name;
         Planet = buildingModel.Planet.Name;
+        IsBuilt = buildingModel.IsBuilt;
+        EstimatedBuildTime = buildingModel.EstimatedBuildTime;
+        ResourceCategory = buildingModel.ResourceCategory.ToLowerString();
     }
 }

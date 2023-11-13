@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Moq;
 using Shard.Shared.Core;
 using Shard.Shared.Web.IntegrationTests.Clock;
+using Shard.Web.ImplementationAPI.Buildings;
 using Shard.Web.ImplementationAPI.Models;
 using Shard.Web.ImplementationAPI.Systems;
 using Shard.Web.ImplementationAPI.Units;
@@ -15,6 +16,7 @@ public class UnitsControllerTests
     private readonly Mock<IUnitsService> _mockUnitsService;
     private readonly Mock<IUsersService> _mockUsersService;
     private readonly Mock<ISystemsService> _mockSystemsService;
+    private readonly Mock<IBuildingsService> _mockBuildingsService;
     private readonly Mock<IClock> _mockClock;
     private readonly MapGenerator _mapGenerator;
     private readonly UnitsController _unitsController;
@@ -26,12 +28,14 @@ public class UnitsControllerTests
         _mockUnitsService = new Mock<IUnitsService>();
         _mockUsersService = new Mock<IUsersService>();
         _mockSystemsService = new Mock<ISystemsService>();
+        _mockBuildingsService = new Mock<IBuildingsService>();
         _mockClock = new Mock<IClock>();
         _mapGenerator = new MapGenerator(options);
         _unitsController = new UnitsController(
             _mockUnitsService.Object,
             _mockUsersService.Object,
             _mockSystemsService.Object,
+            _mockBuildingsService.Object,
             _mockClock.Object
         );
         _mockSystemsService

@@ -25,7 +25,7 @@ public class BuildingsRepositoryTests
             var repo = new BuildingsRepository();
             var user = new UserModel("JohnDoe");
             var system =  _mockSystemsService.Object.GetRandomSystem()!;
-            var building = new BuildingModel("1", BuildingType.Mine, system!, _mockSystemsService.Object.GetRandomPlanet(system)!);
+            var building = new BuildingModel("1", user, BuildingType.Mine, BuildingResourceCategory.Gaseous, system!, _mockSystemsService.Object.GetRandomPlanet(system)!);
 
             // Act
             repo.AddBuilding(user, building);
@@ -43,8 +43,8 @@ public class BuildingsRepositoryTests
             var repo = new BuildingsRepository();
             var user = new UserModel("JohnDoe");
             var system =  _mockSystemsService.Object.GetRandomSystem()!;
-            var building1 = new BuildingModel("1", BuildingType.Mine, system, _mockSystemsService.Object.GetRandomPlanet(system)!);
-            var building2 = new BuildingModel("2", BuildingType.Mine, system, _mockSystemsService.Object.GetRandomPlanet(system)!);
+            var building1 = new BuildingModel("1", user, BuildingType.Mine, BuildingResourceCategory.Gaseous, system, _mockSystemsService.Object.GetRandomPlanet(system)!);
+            var building2 = new BuildingModel("2", user, BuildingType.Mine, BuildingResourceCategory.Gaseous, system, _mockSystemsService.Object.GetRandomPlanet(system)!);
             repo.AddBuilding(user, building1);
             repo.AddBuilding(user, building2);
 
@@ -69,7 +69,7 @@ public class BuildingsRepositoryTests
             var repo = new BuildingsRepository();
             var user = new UserModel("JohnDoe");
             var system =  _mockSystemsService.Object.GetRandomSystem()!;
-            var building = new BuildingModel("1", BuildingType.Mine, system, _mockSystemsService.Object.GetRandomPlanet(system)!);
+            var building = new BuildingModel("1", user, BuildingType.Mine, BuildingResourceCategory.Gaseous, system, _mockSystemsService.Object.GetRandomPlanet(system)!);
             repo.AddBuilding(user, building);
 
             // Act
@@ -91,8 +91,8 @@ public class BuildingsRepositoryTests
             var repo = new BuildingsRepository();
             var user = new UserModel("JohnDoe");
             var system =  _mockSystemsService.Object.GetRandomSystem()!;
-            var building = new BuildingModel("1", BuildingType.Mine, system, _mockSystemsService.Object.GetRandomPlanet(system)!);
-            var updatedBuilding = new BuildingModel("1", BuildingType.Mine, system, _mockSystemsService.Object.GetRandomPlanet(system)!);
+            var building = new BuildingModel("1", user, BuildingType.Mine, BuildingResourceCategory.Gaseous, system, _mockSystemsService.Object.GetRandomPlanet(system)!);
+            var updatedBuilding = new BuildingModel("1", user, BuildingType.Mine, BuildingResourceCategory.Gaseous, system, _mockSystemsService.Object.GetRandomPlanet(system)!);
             repo.AddBuilding(user, building);
 
             // Act

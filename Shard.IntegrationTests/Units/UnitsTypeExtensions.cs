@@ -1,4 +1,5 @@
 using Shard.Web.ImplementationAPI.Units;
+using Shard.Web.ImplementationAPI.Utils;
 
 namespace Shard.IntegrationTests.Units;
 
@@ -25,7 +26,7 @@ public class UnitsTypeExtensions
         public void IsValidUnitType_ReturnsExpectedValidity(string type, bool expected)
         {
             // Act
-            var result = type.IsValidUnitType();
+            var result = type.IsValidEnumValue<UnitType>();
 
             // Assert
             Assert.Equal(expected, result);
@@ -37,7 +38,7 @@ public class UnitsTypeExtensions
         public void ToUnitType_ReturnsExpectedUnitType(string type, UnitType expected)
         {
             // Act
-            var result = type.ToUnitType();
+            var result = type.ToEnum<UnitType>();
 
             // Assert
             Assert.Equal(expected, result);
@@ -48,7 +49,7 @@ public class UnitsTypeExtensions
         public void ToUnitType_ThrowsArgumentException_WhenInvalidType(string type)
         {
             // Act & Assert
-            Assert.Throws<ArgumentException>(() => type.ToUnitType());
+            Assert.Throws<ArgumentException>(() => type.ToEnum<UnitType>());
         }
     }
 }

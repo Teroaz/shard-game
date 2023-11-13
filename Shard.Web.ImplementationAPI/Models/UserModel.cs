@@ -28,9 +28,9 @@ public class UserModel
         DateOfCreation = dateOfCreation;
         ResourcesQuantity = new Dictionary<ResourceKind, int>
         {
-            { ResourceKind.Gold, 0 },
             { ResourceKind.Aluminium, 0 },
             { ResourceKind.Carbon, 20 },
+            { ResourceKind.Gold, 0 },
             { ResourceKind.Iron, 10 },
             { ResourceKind.Oxygen, 50 },
             { ResourceKind.Titanium, 0 },
@@ -44,7 +44,8 @@ public class UserModel
         {
             return Id == user.Id &&
                    Pseudo == user.Pseudo &&
-                   DateOfCreation == user.DateOfCreation;
+                   DateOfCreation == user.DateOfCreation &&
+                   ResourcesQuantity.Equals(user.ResourcesQuantity);
         }
 
         return base.Equals(obj);
@@ -52,6 +53,6 @@ public class UserModel
 
     public override int GetHashCode()
     {
-        return HashCode.Combine(Id, Pseudo, DateOfCreation);
+        return HashCode.Combine(Id, Pseudo, DateOfCreation, ResourcesQuantity);
     }
 }

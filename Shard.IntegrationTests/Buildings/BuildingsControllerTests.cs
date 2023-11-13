@@ -7,6 +7,7 @@ using Shard.Web.ImplementationAPI.Models;
 using Shard.Web.ImplementationAPI.Systems;
 using Shard.Web.ImplementationAPI.Units;
 using Shard.Web.ImplementationAPI.Users;
+using Shard.Web.ImplementationAPI.Utils;
 
 namespace Shard.IntegrationTests.Buildings;
 
@@ -16,6 +17,7 @@ public class BuildingsControllerTests
     private readonly Mock<IBuildingsService> _mockBuildingService;
     private readonly Mock<IUsersService> _mockUserService;
     private readonly Mock<IUnitsService> _mockUnitsService;
+    private readonly Mock<IClock> _mockClock;
 
     private readonly Mock<ISystemsService> _mockSystemsService;
 
@@ -24,9 +26,10 @@ public class BuildingsControllerTests
         _mockBuildingService = new Mock<IBuildingsService>();
         _mockUserService = new Mock<IUsersService>();
         _mockUnitsService = new Mock<IUnitsService>();
+        _mockClock = new Mock<IClock>();
 
         _controller = new BuildingsController(_mockBuildingService.Object, _mockUserService.Object,
-            _mockUnitsService.Object);
+            _mockUnitsService.Object, _mockClock.Object);
         _mockSystemsService = new Mock<ISystemsService>();
         _mockSystemsService.Setup(m => m.GetRandomSystem());
         _mockSystemsService.Setup(m => m.GetRandomPlanet(It.IsAny<SystemModel>()));
@@ -39,7 +42,7 @@ public class BuildingsControllerTests
         var userId = "someUserId";
 
         // Act
-        var result = _controller.CreateBuilding(userId, new CreateBuildingBodyDto("1", "Type", "BuilderId"));
+        var result = _controller.CreateBuilding(userId, new CreateBuildingBodyDto("1", "Type", "BuilderId", "liquid"));
 
         // Assert
         Assert.IsType<NotFoundResult>(result.Result);
@@ -54,7 +57,7 @@ public class BuildingsControllerTests
         _mockUserService.Setup(s => s.GetUserById(userId)).Returns(user);
 
         // Act
-        var result = _controller.CreateBuilding(userId, new CreateBuildingBodyDto(null, null, null));
+        var result = _controller.CreateBuilding(userId, new CreateBuildingBodyDto(null, null, null, null));
 
         // Assert
         Assert.IsType<BadRequestResult>(result.Result);
@@ -69,7 +72,7 @@ public class BuildingsControllerTests
         _mockUserService.Setup(s => s.GetUserById(userId)).Returns(user);
 
         // Act
-        var result = _controller.CreateBuilding(userId, new CreateBuildingBodyDto("1", "InvalidType", "BuilderId"));
+        var result = _controller.CreateBuilding(userId, new CreateBuildingBodyDto("1", "InvalidType", "BuilderId", "liquid"));
 
         // Assert
         Assert.IsType<BadRequestResult>(result.Result);
@@ -85,8 +88,8 @@ public class BuildingsControllerTests
         _mockUnitsService.Setup(s => s.GetUnitByIdAndUser(user, "BuilderId")).Returns((UnitModel)null);
 
         // Act
-        var result = _controller.CreateBuilding(userId, new CreateBuildingBodyDto("1", "Type", "BuilderId"));
-
+        var result = _controller.CreateBuilding(userId, new CreateBuildingBodyDto("1", "Type", "BuilderId", "liquid"));
+        
         // Assert
         Assert.IsType<BadRequestResult>(result.Result);
     }
@@ -111,8 +114,8 @@ public class BuildingsControllerTests
         _mockUnitsService.Setup(u => u.GetUnitByIdAndUser(user, "BuilderId")).Returns(unit);
 
         // Act
-        var result = _controller.CreateBuilding(userId, new CreateBuildingBodyDto("1", BuildingType.Mine.ToLowerString(), "BuilderId"));
-
+        var result = _controller.CreateBuilding(userId, new CreateBuildingBodyDto("1", BuildingType.Mine.ToLowerString(), "BuilderId", "liquid"));
+        
         // Assert
         Assert.IsType<BuildingDto>(result.Value);
         Assert.Equal("1", result.Value.Id);

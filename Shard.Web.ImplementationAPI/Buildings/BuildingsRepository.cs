@@ -5,10 +5,11 @@ namespace Shard.Web.ImplementationAPI.Buildings;
 public class BuildingsRepository : IBuildingsRepository
 {
     private readonly Dictionary<UserModel, List<BuildingModel>> _buildings = new();
-    
 
     public List<BuildingModel> GetBuildingsByUser(UserModel user)
     {
+        if (!_buildings.ContainsKey(user)) return new List<BuildingModel>();
+        
         return _buildings[user];
     }
 
