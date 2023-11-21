@@ -18,21 +18,23 @@ public class SystemsController : ControllerBase
     public ActionResult<IReadOnlyList<SystemDto>> Get()
     {
         var systems = _systemsService.GetAllSystems();
-        return Ok(systems);
+        return Ok(systems.Select(s => new SystemDto(s)).ToList());
     }
 
     [HttpGet("{systemName}")]
     public ActionResult<SystemDto> Get(string systemName)
     {
         var system = _systemsService.GetSystem(systemName);
-        return system == null ? NotFound() : Ok(system);
+        return system == null ? NotFound() : Ok(new SystemDto(system));
     }
 
     [HttpGet("{systemName}/planets")]
     public ActionResult<List<PlanetDto>> GetPlanets(string systemName)
     {
         var system = _systemsService.GetSystem(systemName);
-        return system == null ? NotFound() : Ok(system.Planets);
+        return system == null ? 
+            NotFound() : 
+            Ok(system.Planets.Select(p => new PlanetDto(p)).ToList());
     }
 
     [HttpGet("{systemName}/planets/{planetName}")]
@@ -40,6 +42,6 @@ public class SystemsController : ControllerBase
     {
         var system = _systemsService.GetSystem(systemName);
         var planet = system?.Planets.FirstOrDefault(planet => planet.Name == planetName);
-        return planet == null ? NotFound() : Ok(planet);
+        return planet == null ? NotFound() : Ok(new PlanetDto(planet));
     }
 }
