@@ -9,7 +9,7 @@ public class BuildingDto
     public string Type { get; set; }
     public string System { get; set; }
     public string Planet { get; set; }
-    public DateTime EstimatedBuildTime { get; set; }
+    public DateTime? EstimatedBuildTime { get; set; }
     public bool IsBuilt { get; set; }
     public string ResourceCategory { get; set; }
 

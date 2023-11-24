@@ -83,7 +83,7 @@ public class BuildingsController : ControllerBase
         if (building == null) return NotFound();
 
         var now = _clock.Now;
-        var estimatedBuildingTime = building.EstimatedBuildTime;
+        var estimatedBuildingTime = building.EstimatedBuildTime ?? now;
 
         var timeLeft = estimatedBuildingTime - now;
 

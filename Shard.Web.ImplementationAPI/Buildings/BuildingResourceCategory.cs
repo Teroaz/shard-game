@@ -11,6 +11,9 @@ public enum BuildingResourceCategory
 
 public static class BuildingResourceCategoryExtensions
 {
+    /**
+     * Returns a list of resource kinds that can be produced by a building of this category, sorted by rarity.
+     */
     public static List<ResourceKind> GetResourcesKindByCategory(this BuildingResourceCategory category)
     {
         return category switch
