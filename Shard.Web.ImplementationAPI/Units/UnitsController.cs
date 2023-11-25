@@ -130,7 +130,6 @@ public class UnitsController : ControllerBase
             oldUnit.DestinationPlanet = destinationPlanet;
             
             _unitsService.UpdateUnit(user, oldUnit);
-            oldUnit.Move(_clock, destinationSystem, destinationPlanet);
             
             if (unitsBodyDto.DestinationSystem != unitsBodyDto.System || unitsBodyDto.DestinationPlanet != unitsBodyDto.Planet)
             {
@@ -142,6 +141,9 @@ public class UnitsController : ControllerBase
                     _buildingsService.RemoveBuilding(user, building);
                 }
             }
+
+            oldUnit.Move(_clock, destinationSystem, destinationPlanet);
+
             
             newUnit = oldUnit;
         }

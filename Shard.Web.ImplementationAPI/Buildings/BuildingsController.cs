@@ -55,7 +55,7 @@ public class BuildingsController : ControllerBase
 
         _buildingsService.AddBuilding(user, building);
 
-        building.StartConstruction(_clock);
+        building.ConstructionTask = building.StartConstruction(_clock);
         
         return new BuildingDto(building);
     }
@@ -87,7 +87,7 @@ public class BuildingsController : ControllerBase
 
         var timeLeft = estimatedBuildingTime - now;
 
-        if (timeLeft.TotalSeconds > 2.0)
+        if (timeLeft.TotalSeconds > 2)
         {
             return new BuildingDto(building);
         }

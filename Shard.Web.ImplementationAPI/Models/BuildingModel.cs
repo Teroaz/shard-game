@@ -27,26 +27,26 @@ public class BuildingModel
         IsBuilt = false;
     }
 
-    public void StartConstruction(IClock clock)
+    public async Task StartConstruction(IClock clock)
     {
         EstimatedBuildTime = clock.Now.Add(BuildingConstructionTime.TimeToBuild);
 
-        ConstructionTask = clock.Delay(TimeSpan.FromMinutes(5), CancellationTokenSource.Token).ContinueWith(_ =>
-        {
-            IsBuilt = true;
-            EstimatedBuildTime = null;
-            StartExtraction(clock);
-        });
+        await clock.Delay(TimeSpan.FromMinutes(5), CancellationTokenSource.Token);
+
+        IsBuilt = true;
+        EstimatedBuildTime = null;
+        StartExtraction(clock);
     }
 
-    private void StartExtraction(IClock clock)
+    private async Task StartExtraction(IClock clock)
     {
         var initialDelay = TimeSpan.FromMinutes(1);
         var repeatDelay = TimeSpan.FromMinutes(1);
+        
+        await clock.Delay(initialDelay, CancellationTokenSource.Token);
 
-        clock.CreateTimer(_ =>
+        while (!CancellationTokenSource.Token.IsCancellationRequested)
         {
-            CancellationTokenSource.Token.ThrowIfCancellationRequested();
             var resourceToMine = GetResourceToMine();
 
             try
@@ -58,7 +58,9 @@ public class BuildingModel
                 Console.WriteLine(e);
                 throw;
             }
-        }, null, initialDelay, repeatDelay);
+            
+            await clock.Delay(repeatDelay, CancellationTokenSource.Token);
+        }
     }
 
 
@@ -68,10 +70,10 @@ public class BuildingModel
 
         if (possibleResources.Count == 0) throw new Exception("No resources to mine");
         if (possibleResources.Count == 1) return possibleResources.First();
-        
+
         if (ResourceCategory == BuildingResourceCategory.Solid)
         {
-            var planetAvailableResourceQuantity = Planet.ResourceQuantity.Where(resourceQuantity => possibleResources.Contains(resourceQuantity.Key) && resourceQuantity.Value > 0);
+            var planetAvailableResourceQuantity = Planet.ResourceQuantity.Where(resourceQuantity => possibleResources.Contains(resourceQuantity.Key));
             var targetResource = Planet.ResourceQuantity.First(resourceQuantity => possibleResources.Contains(resourceQuantity.Key));
             foreach (var resource in planetAvailableResourceQuantity)
             {
@@ -90,7 +92,7 @@ public class BuildingModel
 
             return targetResource.Key;
         }
-        
+
         throw new Exception("Unhandled resource category");
     }
 
