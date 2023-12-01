@@ -4,20 +4,39 @@ namespace Shard.Web.ImplementationAPI.Units;
 
 public class UnitsRepository : IUnitsRepository
 {
-    private readonly List<UnitModel> _units = new List<UnitModel>();
-    
-    public UnitModel? GetUnitByIdAndUser(string id, string userId)
+    private readonly Dictionary<UserModel, List<UnitModel>> _units = new();
+
+    public UnitModel? GetUnitByIdAndUser(UserModel user, string id)
     {
-        return _units.FirstOrDefault(unit => unit.Id == id && unit.UserId == userId);
+        if (!_units.ContainsKey(user)) return null;
+        return _units[user].FirstOrDefault(unit => unit.Id == id);
     }
-    
-    public void AddUnit(UnitModel unit)
+
+    public List<UnitModel> GetUnitsByUser(UserModel user) => !_units.ContainsKey(user) ? new List<UnitModel>() : _units[user];
+
+
+    public void AddUnit(UserModel user, UnitModel unit)
     {
-        _units.Add(unit);
+        if (!_units.ContainsKey(user))
+        {
+            _units.Add(user, new List<UnitModel>());
+        }
+
+        _units[user].Add(unit);
     }
-    
-    public  List<UnitModel> GetUnitsByUser(string userId)
+
+    public void RemoveUnit(UserModel user, UnitModel unit)
     {
-        return _units.Where(unit => unit.UserId == userId).ToList();
+        if (!_units.ContainsKey(user)) return;
+
+        _units[user].Remove(unit);
+    }
+
+    public void UpdateUnit(UserModel user, UnitModel unit)
+    {
+        if (!_units.ContainsKey(user)) return;
+
+        var index = _units[user].FindIndex(u => u.Id == unit.Id);
+        _units[user][index] = unit;
     }
 }

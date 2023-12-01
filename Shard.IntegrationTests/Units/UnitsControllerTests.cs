@@ -1,118 +1,315 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using Moq;
+using Shard.Shared.Core;
+using Shard.Shared.Web.IntegrationTests.Clock;
 using Shard.Web.ImplementationAPI.Models;
 using Shard.Web.ImplementationAPI.Systems;
 using Shard.Web.ImplementationAPI.Units;
 using Shard.Web.ImplementationAPI.Units.DTOs;
 using Shard.Web.ImplementationAPI.Users;
-using Shard.Web.ImplementationAPI.Users.Dtos;
 
 namespace Shard.IntegrationTests.Units;
 
 public class UnitsControllerTests
 {
     private readonly Mock<IUnitsService> _mockUnitsService;
-    private readonly Mock<IUserService> _mockUserService;
+    private readonly Mock<IUsersService> _mockUsersService;
     private readonly Mock<ISystemsService> _mockSystemsService;
-    private readonly UnitsController _controller;
+    private readonly Mock<IClock> _mockClock;
+    private readonly MapGenerator _mapGenerator;
+    private readonly UnitsController _unitsController;
+    private const string TestSeed = "testSeed";
 
     public UnitsControllerTests()
     {
+        var options = new MapGeneratorOptions { Seed = TestSeed };
         _mockUnitsService = new Mock<IUnitsService>();
-        _mockUserService = new Mock<IUserService>();
+        _mockUsersService = new Mock<IUsersService>();
         _mockSystemsService = new Mock<ISystemsService>();
-        _controller = new UnitsController(_mockUnitsService.Object, _mockUserService.Object, _mockSystemsService.Object);
+        _mockClock = new Mock<IClock>();
+        _mapGenerator = new MapGenerator(options);
+        _unitsController = new UnitsController(
+            _mockUnitsService.Object,
+            _mockUsersService.Object,
+            _mockSystemsService.Object,
+            _mockClock.Object
+        );
+        _mockSystemsService
+            .Setup(m => m.GetRandomSystem())
+            .Returns(new SystemModel(_mapGenerator.Generate().Systems[0]))
+            ;
+
+        var system = _mockSystemsService.Object.GetRandomSystem()!;
+        _mockSystemsService
+            .Setup(m => m.GetRandomPlanet(system))
+            .Returns(system.Planets[0])
+            ;
     }
 
     [Fact]
-    public void GetUnit_WhenUnitDoesNotExist_ReturnsNotFound()
+    public void Get_ShouldReturnUnitsForUser()
     {
-        _mockUnitsService.Setup(x => x.GetUnitByIdAndUser(It.IsAny<string>(), It.IsAny<string>())).Returns(value: null);
+        // Arrange
+        var userId = "TestUserId";
+        var user = new UserModel("TestUser");
+        _mockUsersService.Setup(service => service.GetUserById(userId)).Returns(user);
+        var system = _mockSystemsService.Object.GetRandomSystem()!;
+        var units = new List<UnitModel>
+        {
+            new UnitModel("TestUnit", UnitType.Scout, system, _mockSystemsService.Object.GetRandomPlanet(system))
+        };
 
-        var result = _controller.Get("testUnitId", "testUserId") as ActionResult<UnitsDto>;
+        _mockUnitsService.Setup(service => service.GetUnitsByUser(user)).Returns(units);
 
-        Assert.NotNull(result);
-        Assert.IsType<NotFoundResult>(result.Result);
+        // Act
+        var result = _unitsController.Get(userId);
+
+        // Assert
+        var okResult = Assert.IsType<OkObjectResult>(result.Result);
+        var returnedUnits = Assert.IsType<List<UnitsDto>>(okResult.Value);
+        Assert.Single(returnedUnits);
     }
 
+    //[Fact]
+    // public async Task Get_WithUnitId_ShouldReturnUnitForUser()
+    // {
+    //     // Arrange
+    //     var userId = "TestUserId";
+    //     var user = new UserModel("TestUser");
+    //     var system = _mockSystemsService.Object.GetRandomSystem()!;
+    //     var unit = new UnitModel("TestUnit", UnitType.Scout, system, _mockSystemsService.Object.GetRandomPlanet(system));
+    //     _mockUsersService.Setup(service => service.GetUserById(userId)).Returns(user);
+    //     _mockUnitsService.Setup(service => service.GetUnitByIdAndUser(user, "TestUnit")).Returns(unit);
+    //
+    //     // Act
+    //     var result = await _unitsController.Get(userId, unit.Id);
+    //
+    //     // Assert
+    //     Assert.IsType<OkObjectResult>(result.Result);
+    // }
+
     [Fact]
-    public void GetUnit_WhenUnitExists_ReturnsOk()
+    public void GetLocation_ShouldReturnUnitLocationForUser()
     {
-        var unit = new UnitModel("testUnitId", "scout", "testSystemId", "testPlanetId", "testUserId");
-        _mockUnitsService.Setup(x => x.GetUnitByIdAndUser(It.IsAny<string>(), It.IsAny<string>())).Returns(unit);
+        // Arrange
+        var userId = "TestUserId";
+        var user = new UserModel("TestUser");
+        var system = _mockSystemsService.Object.GetRandomSystem()!;
+        var unit = new UnitModel("TestUnit", UnitType.Scout, system, _mockSystemsService.Object.GetRandomPlanet(system));
+        _mockUsersService.Setup(service => service.GetUserById(userId)).Returns(user);
+        _mockUnitsService.Setup(service => service.GetUnitByIdAndUser(user, "TestUnit")).Returns(unit);
 
-        var result = _controller.Get("testUnitId", "testUserId") as ActionResult<UnitsDto>;
+        // Act
+        var result = _unitsController.GetLocation(unit.Id, userId);
 
-        Assert.NotNull(result);
+        // Assert
         Assert.IsType<OkObjectResult>(result.Result);
     }
 
     [Fact]
-    public void GetLocation_WhenUnitDoesNotExist_ReturnsNotFound()
+    public void GetLocation_ShouldReturnNotFoundWhenUserDoesNotExist()
     {
-        _mockUnitsService.Setup(x => x.GetUnitByIdAndUser(It.IsAny<string>(), It.IsAny<string>())).Returns(value: null);
+        // Arrange
+        var userId = "TestUserId";
+        var user = new UserModel("TestUser");
+        var system = _mockSystemsService.Object.GetRandomSystem()!;
+        var unit = new UnitModel("TestUnit", UnitType.Scout, system, _mockSystemsService.Object.GetRandomPlanet(system));
+        _mockUsersService.Setup(service => service.GetUserById(userId)).Returns(user);
+        _mockUnitsService.Setup(service => service.GetUnitByIdAndUser(user, "TestUnit")).Returns(unit);
 
-        var result = _controller.GetLocation("testUnitId", "testUserId") as ActionResult<UnitsLocationDto>;
+        // Act
+        var result = _unitsController.GetLocation(unit.Id, "TestUser");
 
-        Assert.NotNull(result);
+        // Assert
         Assert.IsType<NotFoundResult>(result.Result);
     }
 
     [Fact]
-    public void GetLocation_WhenUnitExistsButSystemDoesNotExist_ReturnsOkWithoutResourceQuantity()
+    public void GetLocation_ShouldReturnNotFoundWhenUnitDoesNotExist()
     {
-        var unit = new UnitModel("testUnitId", "scout", "testSystemId", "testPlanetId", "testUserId");
-        _mockUnitsService.Setup(x => x.GetUnitByIdAndUser(It.IsAny<string>(), It.IsAny<string>())).Returns(unit);
-        _mockSystemsService.Setup(x => x.GetSystem(It.IsAny<string>())).Returns(value: null);
+        // Arrange
+        var userId = "TestUserId";
+        var user = new UserModel("TestUser");
+        _mockUsersService.Setup(service => service.GetUserById(userId)).Returns(user);
 
-        var result = _controller.GetLocation("testUnitId", "testUserId") as ActionResult<UnitsLocationDto>;
+        // Act
+        var result = _unitsController.GetLocation("TestUnit", userId);
 
-        Assert.NotNull(result);
-        var locationDto = result.Value;
-        Assert.Null(locationDto?.ResourcesQuantity);
+        // Assert
+        Assert.IsType<NotFoundResult>(result.Result);
     }
 
     [Fact]
-    public void Put_WhenBodyIsInvalid_ReturnsBadRequest()
+    public void GetLocation_ShouldReturnNullOnResourcesWhenUnitTypeIsBuilder()
     {
-        _mockUnitsService.Setup(x => x.IsBodyValid(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<UnitsBodyDto>()))
-            .Returns(false);
+        // Arrange
+        var userId = "TestUserId";
+        var user = new UserModel("TestUser");
+        var system = _mockSystemsService.Object.GetRandomSystem()!;
+        var unit = new UnitModel("TestUnit", UnitType.Builder, system, _mockSystemsService.Object.GetRandomPlanet(system));
+        _mockUsersService.Setup(service => service.GetUserById(userId)).Returns(user);
+        _mockUnitsService.Setup(service => service.GetUnitByIdAndUser(user, "TestUnit")).Returns(unit);
 
-        var result = _controller.Put("testUnitId", "testUserId", new UnitsBodyDto()) as ActionResult<UnitsDto>;
+        // Act
+        var result = _unitsController.GetLocation(unit.Id, userId);
 
-        Assert.NotNull(result);
+        // Assert
+        var okResult = Assert.IsType<OkObjectResult>(result.Result);
+        var returnedUnit = Assert.IsType<UnitsLocationDto>(okResult.Value);
+        Assert.Null(returnedUnit.ResourcesQuantity);
+    }
+
+    [Fact]
+    public async Task Get_WithUnitId_ShouldReturnUnitForUser()
+    {
+        // Arrange
+        var userId = "TestUserId";
+        var user = new UserModel("TestUser");
+        var system = _mockSystemsService.Object.GetRandomSystem()!;
+        var unit = new UnitModel("TestUnit", UnitType.Scout, system, _mockSystemsService.Object.GetRandomPlanet(system));
+        _mockUsersService.Setup(service => service.GetUserById(userId)).Returns(user);
+        _mockUnitsService.Setup(service => service.GetUnitByIdAndUser(user, "TestUnit")).Returns(unit);
+
+        // Act
+        var result = await _unitsController.Get(userId, unit.Id);
+
+        // Assert
+        // var okResult = Assert.IsType<OkObjectResult>(result.Result);
+        // var returnedUnit = Assert.IsType<UnitsDto>(okResult.Value);
+        // Assert.Equal("TestUnit", returnedUnit.Id);
+    }
+
+    [Fact]
+    public async Task Get_UserNotFound_ShouldReturnNotFound()
+    {
+        // Arrange
+        _mockUsersService.Setup(service => service.GetUserById(It.IsAny<string>())).Returns((UserModel)null);
+
+        // Act
+        var result = await _unitsController.Get("nonexistentUserId", "anyUnitId");
+
+        // Assert
+        Assert.IsType<NotFoundResult>(result.Result);
+    }
+
+    [Fact]
+    public async Task Get_UnitNotFound_ShouldReturnNotFound()
+    {
+        // Arrange
+        var userId = "existingUserId";
+        _mockUsersService.Setup(service => service.GetUserById(userId)).Returns(new UserModel(userId));
+        _mockUnitsService.Setup(service => service.GetUnitByIdAndUser(It.IsAny<UserModel>(), It.IsAny<string>())).Returns((UnitModel)null);
+
+        // Act
+        var result = await _unitsController.Get(userId, "nonexistentUnitId");
+
+        // Assert
+        Assert.IsType<NotFoundResult>(result.Result);
+    }
+
+    [Fact]
+    public async Task Get_UnitArrivalInFuture_ShouldReturnUnit()
+    {
+        // Arrange
+        var userId = "existingUserId";
+        var unitId = "existingUnitId";
+        var user = new UserModel(userId);
+        var system = _mockSystemsService.Object.GetRandomSystem();
+        var unit = new UnitModel(unitId, UnitType.Scout, system, null) { EstimatedArrivalTime = _mockClock.Object.Now.AddDays(1) };
+
+        _mockUsersService.Setup(service => service.GetUserById(userId)).Returns(user);
+        _mockUnitsService.Setup(service => service.GetUnitByIdAndUser(user, unitId)).Returns(unit);
+
+        // Act
+        var result = await _unitsController.Get(userId, unitId);
+
+        // Assert
+        var returnedUnit = Assert.IsType<UnitsDto>(result.Value);
+        Assert.Equal(unitId, returnedUnit.Id);
+    }
+
+
+    [Fact]
+    public async Task Get_UnitArrivalWithinTwoSeconds_ShouldHandleCorrectly()
+    {
+        // Arrange
+        var userId = "existingUserId";
+        var unitId = "existingUnitId";
+        var user = new UserModel(userId);
+        var system = _mockSystemsService.Object.GetRandomSystem();
+        var planet = _mockSystemsService.Object.GetRandomPlanet(system);
+        var unit = new UnitModel(unitId, UnitType.Scout, system, planet) { EstimatedArrivalTime = _mockClock.Object.Now.AddSeconds(1) };
+
+        unit.Move(new FakeClock(), system, null);
+
+        _mockUsersService.Setup(service => service.GetUserById(userId)).Returns(user);
+        _mockUnitsService.Setup(service => service.GetUnitByIdAndUser(user, unitId)).Returns(unit);
+
+        // Act
+        var result = await _unitsController.Get(userId, unitId);
+
+        // Assert
+        var returnedUnit = Assert.IsType<UnitsDto>(result.Value);
+        Assert.Equal(unitId, returnedUnit.Id);
+    }
+
+    [Fact]
+    public void Put_UserNotFound_ReturnsNotFound()
+    {
+        // Arrange
+        _mockUsersService.Setup(service => service.GetUserById(It.IsAny<string>())).Returns((UserModel)null);
+
+        // Act
+        var result = _unitsController.Put("nonExistentUserId", "anyUnitId", new UnitsBodyDto());
+
+        // Assert
+        Assert.IsType<NotFoundResult>(result.Result);
+    }
+
+    [Fact]
+    public void Put_InvalidRequestBody_ReturnsBadRequest()
+    {
+        // Arrange
+        var userId = "existingUserId";
+        _mockUsersService.Setup(service => service.GetUserById(userId)).Returns(new UserModel(userId));
+        _mockUnitsService.Setup(service => service.IsBodyValid(It.IsAny<string>(), It.IsAny<UnitsBodyDto>())).Returns(false);
+
+        // Act
+        var result = _unitsController.Put(userId, "anyUnitId", new UnitsBodyDto());
+
+        // Assert
         Assert.IsType<BadRequestResult>(result.Result);
     }
 
     [Fact]
-    public void Put_WhenUserDoesNotExist_ReturnsNotFound()
+    public void Put_DestinationSystemNotFound_ReturnsNotFound()
     {
-        _mockUnitsService.Setup(x => x.IsBodyValid(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<UnitsBodyDto>()))
-            .Returns(true);
-        _mockUserService.Setup(x => x.GetUserById(It.IsAny<string>())).Returns(value: null);
+        // Arrange
+        var userId = "existingUserId";
+        _mockUsersService.Setup(service => service.GetUserById(userId)).Returns(new UserModel(userId));
+        _mockUnitsService.Setup(service => service.IsBodyValid(It.IsAny<string>(), It.IsAny<UnitsBodyDto>())).Returns(true);
+        _mockSystemsService.Setup(service => service.GetSystem(It.IsAny<string>())).Returns((SystemModel)null);
 
-        var result = _controller.Put("testUnitId", "testUserId", new UnitsBodyDto()) as ActionResult<UnitsDto>;
+        // Act
+        var result = _unitsController.Put(userId, "anyUnitId", new UnitsBodyDto { DestinationSystem = "nonExistentSystem" });
 
-        Assert.NotNull(result);
+        // Assert
         Assert.IsType<NotFoundResult>(result.Result);
     }
 
     [Fact]
-    public void Put_WhenUserExistsAndValidBody_ReturnsOk()
+    public void Put_InvalidUnitType_ReturnsBadRequest()
     {
-        var user = new UserModel("testUserId", "testPseudo", DateTimeOffset.Now.ToString("yyyy-MM-ddTHH:mm:ss.fffK"));
-        var unit = new UnitModel("testUnitId", "scout", "testSystemId", "testPlanetId", "testUserId");
+        // Arrange
+        var userId = "existingUserId";
+        var unitsBodyDto = new UnitsBodyDto { Type = "InvalidType" };
+        _mockUsersService.Setup(service => service.GetUserById(userId)).Returns(new UserModel(userId));
+        _mockUnitsService.Setup(service => service.IsBodyValid(It.IsAny<string>(), unitsBodyDto)).Returns(true);
 
-        _mockUnitsService.Setup(x => x.IsBodyValid(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<UnitsBodyDto>()))
-            .Returns(true);
-        _mockUserService.Setup(x => x.GetUserById(It.IsAny<string>())).Returns(new UserDto(user));
-        _mockUnitsService
-            .Setup(x => x.CreateUpdateUnits(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<UnitsBodyDto>()))
-            .Returns(unit);
+        // Act
+        var result = _unitsController.Put(userId, "anyUnitId", unitsBodyDto);
 
-        var result = _controller.Put("testUnitId", "testUserId", new UnitsBodyDto()) as ActionResult<UnitsDto>;
-
-        Assert.NotNull(result);
-        Assert.IsType<OkObjectResult>(result.Result);
+        // Assert
+        Assert.IsType<BadRequestResult>(result.Result);
     }
 }

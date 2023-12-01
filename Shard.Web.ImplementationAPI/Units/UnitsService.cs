@@ -1,76 +1,49 @@
-using System.Text.RegularExpressions;
 using Shard.Web.ImplementationAPI.Models;
 using Shard.Web.ImplementationAPI.Systems;
 using Shard.Web.ImplementationAPI.Units.DTOs;
+using Shard.Web.ImplementationAPI.Users;
 using Shard.Web.ImplementationAPI.Utils;
 
 namespace Shard.Web.ImplementationAPI.Units;
 
 public class UnitsService : IUnitsService
 {
-    
     private readonly IUnitsRepository _unitsRepository;
     
-    private readonly ISystemsService _systemsService;
-    
+
     private readonly ICommon _common;
     
-    public UnitsService(IUnitsRepository unitsRepository, ICommon common, ISystemsService systemsService)
+
+    public UnitsService(IUnitsRepository unitsRepository, ICommon common)
     {
-        _unitsRepository = unitsRepository; 
-        _systemsService = systemsService;
+        _unitsRepository = unitsRepository;
         _common = common;
     }
-    
-    public UnitModel? GetUnitByIdAndUser(string id, string userId)
+
+    public UnitModel? GetUnitByIdAndUser(UserModel user, string id)
     {
-        return _unitsRepository.GetUnitByIdAndUser(id, userId);
-    }
-    
-    public UnitModel CreateUpdateUnits(string id, string userId, UnitsBodyDto unitsBodyDto)
-    {
-        var unit = _unitsRepository.GetUnitByIdAndUser(id, userId);
-        
-        if (unit == null)
-        {
-            // Create new unit
-            var random = new Random();
-            var planet = unitsBodyDto.Planet;
-            var system = _systemsService.GetSystem(unitsBodyDto.System);
-            
-            if (system == null)
-            {
-                var systems = _systemsService.GetAllSystems();
-                var randomSystem = systems[random.Next(systems.Count)];
-                system = _systemsService.GetSystem(randomSystem.Name);
-            }
-            
-            if (unitsBodyDto.Planet == null)
-            {
-                planet = system!.Planets[random.Next(system.Planets.Count)].Name;
-            }
-            
-            
-            unit = new UnitModel(id, unitsBodyDto.Type, unitsBodyDto.System, planet!, userId);
-            
-            _unitsRepository.AddUnit(unit);
-        }
-        else
-        {
-            // Update existing unit
-            unit.Id = unitsBodyDto.Id;
-            unit.Type = unitsBodyDto.Type;
-            unit.System = unitsBodyDto.System;
-            if (unitsBodyDto.Planet != null) unit.Planet = unitsBodyDto.Planet;
-        }
-        
-        return unit;
+        return _unitsRepository.GetUnitByIdAndUser(user, id);
     }
 
-    public bool IsBodyValid(string id, string userId, UnitsBodyDto? unitsBodyDto)
+    public void AddUnit(UserModel user, UnitModel unit)
+    {
+        _unitsRepository.AddUnit(user, unit);
+    }
+
+    public void RemoveUnit(UserModel user, UnitModel unit)
+    {
+        _unitsRepository.RemoveUnit(user, unit);
+    }
+
+    public void UpdateUnit(UserModel user, UnitModel unit)
+    {
+        _unitsRepository.UpdateUnit(user, unit);
+    }
+
+    public bool IsBodyValid(string id, UnitsBodyDto? unitsBodyDto)
     {
         if (
-            unitsBodyDto == null || 
+            unitsBodyDto == null ||
             id != unitsBodyDto.Id ||
             string.IsNullOrWhiteSpace(unitsBodyDto.Type) ||
             string.IsNullOrWhiteSpace(unitsBodyDto.System)
@@ -81,9 +54,9 @@ public class UnitsService : IUnitsService
 
         return _common.IsIdConsistant(id, "^[a-zA-Z0-9_-]+$");
     }
-    
-    public  List<UnitsDto> GetUnitsByUser(string userId)
+
+    public List<UnitModel> GetUnitsByUser(UserModel user)
     {
-        return _unitsRepository.GetUnitsByUser(userId).Select(unit => new UnitsDto(unit)).ToList();
+        return _unitsRepository.GetUnitsByUser(user);
     }
 }

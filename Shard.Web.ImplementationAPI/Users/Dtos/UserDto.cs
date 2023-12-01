@@ -15,6 +15,6 @@ public record UserDto
     {
         Id = userModel.Id;
         Pseudo = userModel.Pseudo;
-        DateOfCreation = userModel.DateOfCreation;
+        DateOfCreation = userModel.DateOfCreation.ToString("yyyy-MM-dd-HH:mm:ss");
     }
 }

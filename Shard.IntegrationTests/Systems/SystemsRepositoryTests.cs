@@ -1,7 +1,7 @@
-﻿using Shard.Shared.Core;
-using Shard.Web.ImplementationAPI.Systems;
+﻿namespace Shard.IntegrationTests.Systems;
 
-namespace Shard.IntegrationTests.Systems;
+using Shard.Shared.Core;
+using Shard.Web.ImplementationAPI.Systems;
 
 public class SystemsRepositoryTests
 {

@@ -1,5 +1,4 @@
 ﻿using Shard.Web.ImplementationAPI.Models;
-using Shard.Web.ImplementationAPI.Systems.DTOs;
 
 namespace Shard.Web.ImplementationAPI.Systems;
 
@@ -22,5 +21,28 @@ public class SystemsService : ISystemsService
     {
         return _systemsRepository.GetSystem(systemName);
     }
-    
+
+    public SystemModel? GetRandomSystem()
+    {
+        var systems = _systemsRepository.GetAllSystems().ToList();
+        if (systems.Count == 0)
+        {
+            return null;
+        }
+
+        var randomSystem = systems.ElementAt(new Random().Next(systems.Count));
+        return randomSystem;
+    }
+
+    public PlanetModel? GetRandomPlanet(SystemModel system)
+    {
+        var planets = system.Planets.ToList();
+        if (planets.Count == 0)
+        {
+            return null;
+        }
+
+        var randomPlanet = planets.ElementAt(new Random().Next(planets.Count));
+        return randomPlanet;
+    }
 }
