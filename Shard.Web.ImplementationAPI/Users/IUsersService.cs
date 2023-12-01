@@ -1,10 +1,12 @@
+using Shard.Web.ImplementationAPI.Models;
 using Shard.Web.ImplementationAPI.Users.Dtos;
 
 namespace Shard.Web.ImplementationAPI.Users;
 
-public interface IUserService
+public interface IUsersService
 {
     bool IsBodyValid(string id, UserBodyDto? userBody);
-    UserDto CreateUpdateUser(string id, UserBodyDto userBody);
-    UserDto? GetUserById(string id);
+    void CreateUser(UserModel userModel);
+    void UpdateUser(string userId, UserModel userModel);
+    UserModel? GetUserById(string id);
 }

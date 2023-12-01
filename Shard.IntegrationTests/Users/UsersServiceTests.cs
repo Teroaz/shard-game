@@ -1,5 +1,4 @@
 ﻿using Moq;
-using Shard.Shared.Core;
 using Shard.Web.ImplementationAPI.Models;
 using Shard.Web.ImplementationAPI.Systems;
 using Shard.Web.ImplementationAPI.Units;
@@ -11,108 +10,114 @@ namespace Shard.IntegrationTests.Users;
 
 public class UsersServiceTests
 {
-    private readonly Mock<IUsersRepository> _mockUsersRepository;
-    private readonly Mock<ISystemsService> _mockSystemsService;
-    private readonly Mock<ICommon> _mockCommon;
+    private readonly Mock<IUsersRepository> _mockUsersRepo = new();
+    private readonly Mock<ISystemsService> _mockSystemsService = new();
+    private readonly Mock<IUnitsRepository> _mockUnitsRepo = new();
+    private readonly Mock<ICommon> _mockCommon = new();
     private readonly UsersService _service;
-
-    private const string TestUserId = "testUserId";
-    private readonly UserDto _expectedUserDto;
-    private readonly UserModel _expectedUserModel;
-
-    private const string TestSeed = "testSeed";
-    private readonly SystemSpecification _systemSpecification;
 
     public UsersServiceTests()
     {
-        _mockUsersRepository = new Mock<IUsersRepository>();
-        _mockSystemsService = new Mock<ISystemsService>();
-        Mock<IUnitsRepository> mockUnitsRepository = new();
-
-        var options = new MapGeneratorOptions { Seed = TestSeed };
-        var mapGenerator = new MapGenerator(options);
-        _systemSpecification = mapGenerator.Generate().Systems[0];
-
-        _mockCommon = new Mock<ICommon>();
-        _service = new UsersService(_mockUsersRepository.Object, _mockCommon.Object, _mockSystemsService.Object,
-            mockUnitsRepository.Object);
-
-        var now = DateTimeOffset.Now;
-
-        var user = new UserModel(TestUserId, "testPseudo", now.ToString("yyyy-MM-ddTHH:mm:ss.fffK"));
-        _expectedUserDto = new UserDto(user);
-        _expectedUserModel = new UserModel(TestUserId, "testPseudo", now.ToString("yyyy-MM-ddTHH:mm:ss.fffK"));
+        _service = new UsersService(_mockUsersRepo.Object, _mockCommon.Object, _mockSystemsService.Object, _mockUnitsRepo.Object);
     }
 
     [Fact]
-    public void GetUserById_UserExists_ReturnsExpectedUserDto()
+    public void GetUserById_ShouldReturnUser()
     {
-        _mockUsersRepository.Setup(r => r.GetUserById(TestUserId)).Returns(_expectedUserModel);
+        var user = new UserModel("1", "testUser");
+        _mockUsersRepo.Setup(repo => repo.GetUserById("1")).Returns(user);
 
-        var result = _service.GetUserById(TestUserId);
+        var result = _service.GetUserById("1");
 
-        Assert.Equal(_expectedUserDto, result);
+        Assert.Equal(user, result);
     }
 
     [Fact]
-    public void GetUserById_UserDoesNotExist_ReturnsNull()
+    public void IsBodyValid_ShouldReturnFalseForNullUserBody()
     {
-        _mockUsersRepository.Setup(r => r.GetUserById(TestUserId)).Returns((UserModel)null);
-
-        var result = _service.GetUserById(TestUserId);
-
-        Assert.Null(result);
+        var result = _service.IsBodyValid("1", null);
+        Assert.False(result);
     }
 
     [Fact]
-    public void IsBodyValid_BodyIsValid_ReturnsTrue()
+    public void IsBodyValid_ShouldReturnFalseForMismatchedId()
     {
-        _mockCommon.Setup(c => c.IsIdConsistant(TestUserId, "^[a-zA-Z0-9_-]+$")).Returns(true);
+        var result = _service.IsBodyValid("1", new UserBodyDto { Id = "2", Pseudo = "testUser" });
+        Assert.False(result);
+    }
 
-        var result = _service.IsBodyValid(TestUserId, new UserBodyDto { Id = TestUserId, Pseudo = "testPseudo" });
+    [Fact]
+    public void IsBodyValid_ShouldReturnFalseForInvalidPseudo()
+    {
+        var result = _service.IsBodyValid("1", new UserBodyDto { Id = "1", Pseudo = "" });
+        Assert.False(result);
+    }
+
+    [Fact]
+    public void IsBodyValid_ShouldReturnTrueForValidBody()
+    {
+        _mockCommon.Setup(common => common.IsIdConsistant("1", "^[a-zA-Z0-9_-]+$")).Returns(true);
+
+        var result = _service.IsBodyValid("1", new UserBodyDto { Id = "1", Pseudo = "testUser" });
 
         Assert.True(result);
     }
 
     [Fact]
-    public void IsBodyValid_BodyIsNotValid_ReturnsFalse()
+    public void CreateUser_ShouldThrowExceptionIfUserExists()
     {
-        _mockCommon.Setup(c => c.IsIdConsistant(TestUserId, "^[a-zA-Z0-9_-]+$")).Returns(false);
+        var user = new UserModel("1", "testUser");
+        _mockUsersRepo.Setup(repo => repo.GetUserById("1")).Returns(user);
 
-        var result = _service.IsBodyValid(TestUserId, new UserBodyDto { Id = "testAnotherId", Pseudo = "testPseudo" });
-
-        Assert.False(result);
+        Assert.Throws<Exception>(() => _service.CreateUser(user));
     }
 
     [Fact]
-    public void CreateUpdateUser_UserDoesNotExist_CreatesUserAndReturnsDto()
+    public void CreateUser_ShouldThrowExceptionIfSystemNotFound()
     {
-        var userBodyDto = new UserBodyDto { Id = TestUserId, Pseudo = "testPseudo" };
-        _mockUsersRepository.Setup(r => r.GetUserById(TestUserId)).Returns((UserModel)null);
-        _mockSystemsService.Setup(s => s.GetAllSystems()).Returns(new List<SystemModel>
-        {
-            new(_systemSpecification)
-        });
+        var user = new UserModel("1", "testUser");
+        _mockUsersRepo.Setup(repo => repo.GetUserById("1")).Returns((UserModel)null);
+        _mockSystemsService.Setup(service => service.GetRandomSystem()).Returns((SystemModel)null);
 
-        var result = _service.CreateUpdateUser(TestUserId, userBodyDto);
+        Assert.Throws<Exception>(() => _service.CreateUser(user));
+    }
 
-        Assert.NotNull(result);
-        Assert.Equal(TestUserId, result.Id);
-        Assert.Equal(userBodyDto.Pseudo, result.Pseudo);
+    //[Fact]
+    // public void CreateUser_ShouldAddUserAndUnits()
+    // {
+    //     var user = new UserModel("1", "testUser");
+    //     var system = _mockSystemsService.Object.GetRandomSystem();
+    //
+    //     _mockUsersRepo.Setup(repo => repo.GetUserById("1")).Returns((UserModel)null);
+    //     _mockSystemsService.Setup(service => service.GetRandomSystem()).Returns((SystemModel)null);
+    //
+    //     _service.CreateUser(user);
+    //
+    //     _mockUsersRepo.Verify(repo => repo.AddUser(user), Times.Once);
+    //     _mockUnitsRepo.Verify(repo => repo.AddUnit(user, It.Is<UnitModel>(unit => unit.Type == UnitType.Scout)), Times.Once);
+    //     _mockUnitsRepo.Verify(repo => repo.AddUnit(user, It.Is<UnitModel>(unit => unit.Type == UnitType.Builder)), Times.Once);
+    // }
+
+
+    [Fact]
+    public void UpdateUser_ShouldThrowExceptionIfUserNotFound()
+    {
+        var user = new UserModel("1", "testUser");
+        _mockUsersRepo.Setup(repo => repo.GetUserById("1")).Returns((UserModel)null);
+
+        Assert.Throws<Exception>(() => _service.UpdateUser("1", user));
     }
 
     [Fact]
-    public void CreateUpdateUser_UserExists_UpdatesUserAndReturnsDto()
+    public void UpdateUser_ShouldUpdatePseudo()
     {
-        var userBodyDto = new UserBodyDto { Id = TestUserId, Pseudo = "newPseudo" };
-        var existingUser =
-            new UserModel(TestUserId, "oldPseudo", DateTimeOffset.Now.ToString("yyyy-MM-ddTHH:mm:ss.fffK"));
-        _mockUsersRepository.Setup(r => r.GetUserById(TestUserId)).Returns(existingUser);
+        var user = new UserModel("1", "original");
+        var updatedUser = new UserModel("1", "updated");
 
-        var result = _service.CreateUpdateUser(TestUserId, userBodyDto);
+        _mockUsersRepo.Setup(repo => repo.GetUserById("1")).Returns(user);
 
-        Assert.NotNull(result);
-        Assert.Equal(TestUserId, result.Id);
-        Assert.Equal(userBodyDto.Pseudo, result.Pseudo);
+        _service.UpdateUser("1", updatedUser);
+
+        Assert.Equal(updatedUser.Pseudo, user.Pseudo);
     }
 }

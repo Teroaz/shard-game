@@ -5,10 +5,15 @@ namespace Shard.Web.ImplementationAPI.Units;
 
 public interface IUnitsService
 {
-    UnitModel? GetUnitByIdAndUser(string id, string userId);
-    UnitModel CreateUpdateUnits(string id, string userId, UnitsBodyDto unitsBodyDto);
+    UnitModel? GetUnitByIdAndUser(UserModel user, string id);
     
-    Boolean IsBodyValid(string id, string userId, UnitsBodyDto? unitsBodyDto);
+    bool IsBodyValid(string id, UnitsBodyDto? unitsBodyDto);
     
-    public  List<UnitsDto> GetUnitsByUser(string userId);
+    public List<UnitModel> GetUnitsByUser(UserModel user);
+    
+    void AddUnit(UserModel user, UnitModel unit);
+
+    void RemoveUnit(UserModel user, UnitModel unit);
+
+    void UpdateUnit(UserModel user, UnitModel unit);
 }

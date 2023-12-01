@@ -1,57 +1,101 @@
-﻿using Shard.Web.ImplementationAPI.Models;
+using Moq;
+using Shard.Web.ImplementationAPI.Models;
+using Shard.Web.ImplementationAPI.Systems;
 using Shard.Web.ImplementationAPI.Units;
 
 namespace Shard.IntegrationTests.Units;
 
 public class UnitsRepositoryTests
 {
-    private readonly UnitsRepository _repository = new();
-
-    [Fact]
-    public void GetUnitByIdAndUser_WhenUnitDoesNotExist_ReturnsNull()
+    
+    private readonly Mock<ISystemsService> _mockSystemsService;
+    
+    public UnitsRepositoryTests()
     {
-        var result = _repository.GetUnitByIdAndUser("nonexistentId", "testUserId");
+        _mockSystemsService = new Mock<ISystemsService>();
+        _mockSystemsService.Setup(m => m.GetRandomSystem()); 
+    }
+    
+    [Fact]
+    public void AddUnit_ShouldAddUnitToRepository()
+    {
+        // Arrange
+        var repository = new UnitsRepository();
+        var user = new UserModel("TestUser");
+        var unit = new UnitModel("TestUnit", UnitType.Scout, _mockSystemsService.Object.GetRandomSystem()!, null);
 
-        Assert.Null(result);
+        // Act
+        repository.AddUnit(user, unit);
+
+        // Assert
+        var retrievedUnit = repository.GetUnitByIdAndUser(user, "TestUnit");
+        Assert.Equal(unit, retrievedUnit);
     }
 
     [Fact]
-    public void GetUnitByIdAndUser_WhenUnitExistsForGivenUser_ReturnsUnit()
+    public void GetUnitsByUser_ShouldReturnAllUnitsForUser()
     {
-        var unit = new UnitModel("testUnitId", "scout", "testSystemId", "testPlanetId", "testUserId");
-        _repository.AddUnit(unit);
+        // Arrange
+        var repository = new UnitsRepository();
+        var user = new UserModel("TestUser");
+        var unit1 = new UnitModel("TestUnit1", UnitType.Scout, _mockSystemsService.Object.GetRandomSystem()!, null);
+        var unit2 = new UnitModel("TestUnit2", UnitType.Scout, _mockSystemsService.Object.GetRandomSystem()!, null);
+        repository.AddUnit(user, unit1);
+        repository.AddUnit(user, unit2);
 
-        var result = _repository.GetUnitByIdAndUser("testUnitId", "testUserId");
+        // Act
+        var units = repository.GetUnitsByUser(user);
 
-        Assert.NotNull(result);
-        Assert.Equal(unit, result);
+        // Assert
+        Assert.Equal(2, units.Count);
+        Assert.Contains(unit1, units);
+        Assert.Contains(unit2, units);
     }
 
     [Fact]
-    public void AddUnit_ShouldAddUnitToList()
+    public void RemoveUnit_ShouldRemoveUnitFromRepository()
     {
-        var unit = new UnitModel("newTestUnitId", "warrior", "testSystemId2", "testPlanetId2", "testUserId2");
-        _repository.AddUnit(unit);
+        // Arrange
+        var repository = new UnitsRepository();
+        var user = new UserModel("TestUser");
+        var unit = new UnitModel("TestUnit", UnitType.Scout, _mockSystemsService.Object.GetRandomSystem()!, null);
+        repository.AddUnit(user, unit);
 
-        var result = _repository.GetUnitByIdAndUser("newTestUnitId", "testUserId2");
+        // Act
+        repository.RemoveUnit(user, unit);
 
-        Assert.NotNull(result);
-        Assert.Equal(unit, result);
+        // Assert
+        var retrievedUnit = repository.GetUnitByIdAndUser(user, "TestUnit");
+        Assert.Null(retrievedUnit);
+        
+        // Assert
+        var fakeUser = new UserModel("FakeUser");
+        repository.RemoveUnit(fakeUser, unit);
+        Assert.DoesNotContain(unit, repository.GetUnitsByUser(user));
     }
 
     [Fact]
-    public void GetUnitsByUser_ReturnsAllUnitsForGivenUser()
+    public void UpdateUnit_ShouldUpdateUnitInRepository()
     {
-        var unit1 = new UnitModel("unitId1", "scout", "testSystemId", "testPlanetId", "testUserId3");
-        var unit2 = new UnitModel("unitId2", "warrior", "testSystemId", "testPlanetId", "testUserId3");
-        _repository.AddUnit(unit1);
-        _repository.AddUnit(unit2);
+        // Arrange
+        var repository = new UnitsRepository();
+        var user = new UserModel("TestUser");
+        var unit = new UnitModel("TestUnit", UnitType.Scout, _mockSystemsService.Object.GetRandomSystem()!, null);
+        repository.AddUnit(user, unit);
 
-        var result = _repository.GetUnitsByUser("testUserId3");
+        // Act
+        var updatedUnit = new UnitModel("TestUnit", UnitType.Builder, _mockSystemsService.Object.GetRandomSystem()!, null);
+        repository.UpdateUnit(user, updatedUnit);
 
-        Assert.NotNull(result);
-        Assert.Equal(2, result.Count);
-        Assert.Contains(unit1, result);
-        Assert.Contains(unit2, result);
+        // Assert
+        var retrievedUnit = repository.GetUnitByIdAndUser(user, "TestUnit");
+        Assert.Equal(UnitType.Builder, retrievedUnit?.Type);
+        
+        // Assert
+        var fakeUser = new UserModel("FakeUser");
+        repository.UpdateUnit(fakeUser, updatedUnit);
+        var retrievedUnit2 = repository.GetUnitByIdAndUser(fakeUser, "TestUnit");   
+        Assert.Null(retrievedUnit2);
+        
     }
 }
