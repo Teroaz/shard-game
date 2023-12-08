@@ -34,7 +34,7 @@ public class UserModel
             { ResourceKind.Iron, 10 },
             { ResourceKind.Oxygen, 50 },
             { ResourceKind.Titanium, 0 },
-            { ResourceKind.Water, 50 },   
+            { ResourceKind.Water, 50 },
         };
     }
 

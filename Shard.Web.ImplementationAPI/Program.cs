@@ -1,10 +1,13 @@
 using System.Text.Json;
+using Microsoft.AspNetCore.Authentication;
 using Shard.Shared.Core;
 using Shard.Web.ImplementationAPI.Buildings;
+using Shard.Web.ImplementationAPI.Handler;
 using Shard.Web.ImplementationAPI.Systems;
 using Shard.Web.ImplementationAPI.Units;
 using Shard.Web.ImplementationAPI.Users;
 using Shard.Web.ImplementationAPI.Utils;
+using SystemClock = Shard.Shared.Core.SystemClock;
 
 var builder = WebApplication.CreateBuilder(args);
 var configuration = builder.Configuration;
@@ -32,6 +35,9 @@ builder.Services.AddSingleton<IClock, SystemClock>();
 builder.Services.Configure<MapGeneratorOptions>(options => options.Seed = configuration["MapGenerator:Options:Seed"]);
 builder.Services.AddSingleton<MapGenerator>();
 
+builder.Services.AddAuthentication("BasicAuthentication")
+    .AddScheme<AuthenticationSchemeOptions, BasicAuthenticationHandler>("BasicAuthentication", null);
+
 
 var app = builder.Build();
 
@@ -40,7 +46,10 @@ if (app.Environment.IsDevelopment())
     app.UseDeveloperExceptionPage();
 }
 
+
 app.UseRouting();
+app.UseAuthentication();
+app.UseAuthorization();
 app.UseEndpoints(endpoints => { endpoints.MapControllers(); });
 
 app.Run();
