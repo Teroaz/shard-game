@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Shard.Web.ImplementationAPI.Enums;
 using Shard.Web.ImplementationAPI.Models;
 using Shard.Web.ImplementationAPI.Users.Dtos;
 
@@ -37,9 +38,14 @@ public class UsersController : ControllerBase
         }
         else
         {
-            user = new UserModel(userBody.Id, userBody.Pseudo);
-            _userService.UpdateUser(id, user);
+            if (HttpContext.User.IsInRole(Roles.Admin))
+            {
+                user = new UserModel(userBody.Id, userBody.Pseudo);
+                _userService.UpdateUser(id, user);
+            }
         }
+        
+        
 
         return Ok(new UserDto(user));
     }

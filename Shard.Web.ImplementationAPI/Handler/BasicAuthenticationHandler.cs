@@ -44,7 +44,7 @@ public class BasicAuthenticationHandler : AuthenticationHandler<AuthenticationSc
         var claims = new[]
         {
             new Claim(ClaimTypes.NameIdentifier, user.Pseudo),
-            new Claim(ClaimTypes.Role, Role.Admin)
+            new Claim(ClaimTypes.Role, Roles.Admin)
         };
         var identity = new ClaimsIdentity(claims, Scheme.Name);
         var principal = new ClaimsPrincipal(identity);
