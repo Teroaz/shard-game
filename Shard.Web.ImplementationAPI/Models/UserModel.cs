@@ -55,4 +55,19 @@ public class UserModel
     {
         return HashCode.Combine(Id, Pseudo, DateOfCreation, ResourcesQuantity);
     }
+    
+    public bool HasEnoughResources(Dictionary<ResourceKind, int> resources)
+    {
+        return resources.All(
+            resource => resource.Value <= ResourcesQuantity[resource.Key]
+        );
+    }
+    
+    public void ConsumeResources(Dictionary<ResourceKind, int> resources)
+    {
+        foreach (KeyValuePair<ResourceKind, int> resource in resources)
+        {
+            ResourcesQuantity[resource.Key] = ResourcesQuantity[resource.Key] - resource.Value;
+        }
+    }
 }

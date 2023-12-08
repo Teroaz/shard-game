@@ -18,14 +18,14 @@ public class BasicAuthenticationHandler : AuthenticationHandler<AuthenticationSc
 
     protected override async Task<AuthenticateResult> HandleAuthenticateAsync()
     {
-        if (!Request.Headers.ContainsKey("Authorization"))
+        if (!Context.Request.Headers.ContainsKey("Authorization"))
             return AuthenticateResult.Fail("Missing Authorization Header");
 
         UserModel? user = null;
 
         try
         {
-            var authHeader = AuthenticationHeaderValue.Parse(Request.Headers["Authorization"]);
+            var authHeader = AuthenticationHeaderValue.Parse(Context.Request.Headers["Authorization"]);
             var credentialBytes = Convert.FromBase64String(authHeader.Parameter!);
             var credentials = Encoding.UTF8.GetString(credentialBytes).Split(':');
             var pseudo = credentials[0];
@@ -55,6 +55,6 @@ public class BasicAuthenticationHandler : AuthenticationHandler<AuthenticationSc
 
     private UserModel? ValidateCredentials(string pseudo, string password)
     {
-        return pseudo == "admin" && password == "admin" ? new UserModel(pseudo, password) : null;
+        return pseudo == "admin" && password == "password" ? new UserModel(pseudo, password) : null;
     }
 }

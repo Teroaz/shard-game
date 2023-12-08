@@ -1,5 +1,8 @@
 ﻿using Shard.Shared.Core;
 using Shard.Web.ImplementationAPI.Buildings;
+using Shard.Web.ImplementationAPI.Buildings.DTOs;
+using Shard.Web.ImplementationAPI.Units;
+using Shard.Web.ImplementationAPI.Utils;
 
 namespace Shard.Web.ImplementationAPI.Models;
 
@@ -15,6 +18,8 @@ public class BuildingModel
     public DateTime? EstimatedBuildTime { get; set; }
     public Task? ConstructionTask { get; set; }
     public CancellationTokenSource CancellationTokenSource { get; set; } = new();
+    
+    public List<UnitType>? Queue { get; set; }
 
     public BuildingModel(string id, UserModel user, BuildingType type, BuildingResourceCategory? resourceCategory,
         SystemModel system, PlanetModel planet)
@@ -26,6 +31,50 @@ public class BuildingModel
         System = system;
         Planet = planet;
         IsBuilt = false;
+    }
+
+    public static Dictionary<ResourceKind, int> GetStarportCosts(UnitType unit)
+    {
+        var costs = new Dictionary<UnitType, Dictionary<ResourceKind, int>>
+        {
+            {
+                UnitType.Scout,
+                new Dictionary<ResourceKind, int> {
+                    { ResourceKind.Carbon, 5 },
+                    { ResourceKind.Iron, 5 }
+                }
+            },
+            {
+                UnitType.Builder,
+                new Dictionary<ResourceKind, int> {
+                    { ResourceKind.Carbon, 5 },
+                    { ResourceKind.Iron, 10 }
+                }
+            },
+            {
+                UnitType.Fighter,
+                new Dictionary<ResourceKind, int> {
+                    { ResourceKind.Iron, 20 },
+                    { ResourceKind.Aluminium, 10 }
+                }
+            },
+            {
+                UnitType.Cruiser,
+                new Dictionary<ResourceKind, int> {
+                    { ResourceKind.Iron, 30 },
+                    { ResourceKind.Titanium, 10 }
+                }
+            },
+            {
+                UnitType.Bomber,
+                new Dictionary<ResourceKind, int> {
+                    { ResourceKind.Iron, 60 },
+                    { ResourceKind.Gold, 20 }
+                }
+            }
+        };
+        
+        return costs[unit];
     }
 
     public async Task StartConstruction(IClock clock)
@@ -109,5 +158,20 @@ public class BuildingModel
 
         Planet.ResourceQuantity[resourceKind] -= 1;
         User.ResourcesQuantity[resourceKind] += 1;
+    }
+    
+    public async void AddToQueue(UnitType unitType, UserModel user)
+    {
+        Dictionary<ResourceKind, int> resourcesToConsume = GetStarportCosts(unitType);
+        if (Queue != null && user.HasEnoughResources(resourcesToConsume))
+        {
+            Queue.Add(unitType);
+            user.ConsumeResources(resourcesToConsume);
+        }
+        else
+        {
+            throw new Exception("Not enough resources");
+        }
+            
     }
 }

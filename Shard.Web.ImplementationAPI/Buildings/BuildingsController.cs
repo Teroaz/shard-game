@@ -115,4 +115,46 @@ public class BuildingsController : ControllerBase
 
         return new BuildingDto(building);
     }
+    
+    [HttpPost("{starportId}/queue")]
+    public ActionResult<UnitModel> AddToQueue(string userId, string starportId, [FromBody] QueueDto queue)
+    {
+        var user = _usersService.GetUserById(userId);
+
+        if (user == null)
+        {
+            return NotFound();
+        }
+
+        var buildings = _buildingsService.GetBuildingsByUser(user);;
+        var starport = buildings.Find(building => building.Id == starportId);
+
+        if (starport == null)
+        {
+            return NotFound();
+        }
+
+        if (starport.IsBuilt != true)
+        {
+            return BadRequest();
+        }
+
+        if(starport.Type != BuildingType.Starport)
+        {
+            return BadRequest();
+        }
+
+        try
+        {
+            var type = queue.Type.ToEnum<UnitType>();
+            starport.AddToQueue(type, user);
+            var unit = new UnitModel(queue.Type.ToEnum<UnitType>(), starport.System, starport.Planet);
+            _unitsService.AddUnit(user, unit);
+            return Ok(unit);
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(ex.Message);
+        }
+    }
 }

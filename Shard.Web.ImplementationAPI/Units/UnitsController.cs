@@ -106,7 +106,8 @@ public class UnitsController : ControllerBase
         var isValid = _unitsService.IsBodyValid(unitId, unitsBodyDto);
         if (!isValid) return BadRequest();
 
-        var destinationSystem = _systemsService.GetSystem(unitsBodyDto.DestinationSystem);
+        var destinationSystem = unitsBodyDto.DestinationSystem != null ? _systemsService.GetSystem(unitsBodyDto.DestinationSystem) : null;
+        
         var planets = _systemsService.GetAllSystems().SelectMany(system => system.Planets);
         var destinationPlanet = planets.FirstOrDefault(planet => planet.Name == unitsBodyDto.DestinationPlanet);
 

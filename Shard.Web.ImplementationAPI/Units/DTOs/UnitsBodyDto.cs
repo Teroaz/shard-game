@@ -10,7 +10,7 @@ public class UnitsBodyDto
 
     public string? Planet { get; init; }
 
-    public string DestinationSystem { get; init; }
+    public string? DestinationSystem { get; init; }
 
     public string? DestinationPlanet { get; init; }
 }

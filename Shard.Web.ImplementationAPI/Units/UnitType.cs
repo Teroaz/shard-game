@@ -3,5 +3,8 @@
 public enum UnitType
 {
     Scout,
-    Builder
+    Builder,
+    Fighter,
+    Bomber,
+    Cruiser
 }

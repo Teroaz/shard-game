@@ -2,5 +2,6 @@
 
 public enum BuildingType
 {
-    Mine
+    Mine,
+    Starport
 }
