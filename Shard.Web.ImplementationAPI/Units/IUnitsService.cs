@@ -1,5 +1,6 @@
 using Shard.Web.ImplementationAPI.Models;
 using Shard.Web.ImplementationAPI.Units.DTOs;
+using Shard.Web.ImplementationAPI.Units.Models;
 
 namespace Shard.Web.ImplementationAPI.Units;
 
@@ -16,4 +17,8 @@ public interface IUnitsService
     void RemoveUnit(UserModel user, UnitModel unit);
 
     void UpdateUnit(UserModel user, UnitModel unit);
+    
+    UnitModel ConstructSpecificUnit(UnitType unitType, string unitId, SystemModel system, PlanetModel? planet);
+    
+    UnitModel ConstructSpecificUnit(UnitType unitType, SystemModel system, PlanetModel? planet);
 }

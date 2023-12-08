@@ -3,6 +3,7 @@ using Shard.Shared.Core;
 using Shard.Web.ImplementationAPI.Models;
 using Shard.Web.ImplementationAPI.Systems;
 using Shard.Web.ImplementationAPI.Units;
+using Shard.Web.ImplementationAPI.Units.Models;
 
 namespace Shard.IntegrationTests.Units;
 
@@ -43,7 +44,7 @@ public class UnitModelTests
         // Arrange
 
         // Act
-        var unitModel = new UnitModel(UnitType.Scout, _systemModel, _planetModel);
+        var unitModel = new ScoutUnitModel(_systemModel, _planetModel);
 
         // Assert
         Assert.NotNull(unitModel.Id);
@@ -58,7 +59,7 @@ public class UnitModelTests
     public void Move_UpdatesPropertiesCorrectly()
     {
         // Arrange
-        var unitModel = new UnitModel(UnitType.Scout, _systemModel, _planetModel);
+        var unitModel = new ScoutUnitModel(_systemModel, _planetModel);
 
         // Act
         unitModel.Move(_mockClock.Object, unitModel.DestinationSystem, unitModel.DestinationPlanet);

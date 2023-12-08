@@ -1,8 +1,9 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Shard.Shared.Core;
 using Shard.Web.ImplementationAPI.Buildings.DTOs;
-using Shard.Web.ImplementationAPI.Models;
+using Shard.Web.ImplementationAPI.Buildings.Models;
 using Shard.Web.ImplementationAPI.Units;
+using Shard.Web.ImplementationAPI.Units.DTOs;
 using Shard.Web.ImplementationAPI.Users;
 using Shard.Web.ImplementationAPI.Utils;
 
@@ -32,11 +33,7 @@ public class BuildingsController : ControllerBase
         var user = _usersService.GetUserById(userId);
         if (user == null) return NotFound();
 
-        if (createBuildingBodyDto.BuilderId == null || createBuildingBodyDto.Type == null ||
-            createBuildingBodyDto.Id == null)
-        {
-            return BadRequest();
-        }
+        if (createBuildingBodyDto.BuilderId == null || createBuildingBodyDto.Type == null) return BadRequest();
 
         if (!createBuildingBodyDto.Type.IsValidEnumValue<BuildingType>()) return BadRequest();
         if (createBuildingBodyDto.ResourceCategory != null && !createBuildingBodyDto.ResourceCategory.IsValidEnumValue<BuildingResourceCategory>()) return BadRequest();
@@ -44,19 +41,21 @@ public class BuildingsController : ControllerBase
         var unit = _unitsService.GetUnitByIdAndUser(user, createBuildingBodyDto.BuilderId);
         if (unit?.Planet == null) return BadRequest();
 
-        var building = new BuildingModel(
-            createBuildingBodyDto.Id, 
-            user, 
-            createBuildingBodyDto.Type.ToEnum<BuildingType>(),
-            createBuildingBodyDto.ResourceCategory?.ToEnum<BuildingResourceCategory>(),
-            unit.System, 
-            unit.Planet
-            );
+        var buildingType = createBuildingBodyDto.Type.ToEnum<BuildingType>();
+        if (buildingType == BuildingType.Mine && createBuildingBodyDto.ResourceCategory == null) return BadRequest();
+        var resourceCategory = createBuildingBodyDto.ResourceCategory?.ToEnum<BuildingResourceCategory>();
+
+        BuildingModel building = buildingType switch
+        {
+            BuildingType.Starport => new StarportBuildingModel(createBuildingBodyDto.Id, user, unit.System, unit.Planet),
+            BuildingType.Mine => new MineBuildingModel(createBuildingBodyDto.Id, user, unit.System, unit.Planet, (BuildingResourceCategory)resourceCategory!),
+            _ => throw new ArgumentOutOfRangeException()
+        };
 
         _buildingsService.AddBuilding(user, building);
 
         building.ConstructionTask = building.StartConstruction(_clock);
-        
+
         return new BuildingDto(building);
     }
 
@@ -115,46 +114,24 @@ public class BuildingsController : ControllerBase
 
         return new BuildingDto(building);
     }
-    
+
     [HttpPost("{starportId}/queue")]
-    public ActionResult<UnitModel> AddToQueue(string userId, string starportId, [FromBody] QueueDto queue)
+    public ActionResult<UnitsDto> AddToQueue(string userId, string starportId, [FromBody] QueueDto queue)
     {
         var user = _usersService.GetUserById(userId);
+        if (user == null) return NotFound();
 
-        if (user == null)
-        {
-            return NotFound();
-        }
+        var building = _buildingsService.GetBuildingByIdAndUser(user, starportId);
+        if (building == null) return NotFound();
+        if (!building.IsBuilt || building is not StarportBuildingModel starport) return BadRequest();
 
-        var buildings = _buildingsService.GetBuildingsByUser(user);;
-        var starport = buildings.Find(building => building.Id == starportId);
+        if (queue.Type.IsValidEnumValue<UnitType>()) return BadRequest();
 
-        if (starport == null)
-        {
-            return NotFound();
-        }
+        var queueUnitType = queue.Type.ToEnum<UnitType>();
 
-        if (starport.IsBuilt != true)
-        {
-            return BadRequest();
-        }
-
-        if(starport.Type != BuildingType.Starport)
-        {
-            return BadRequest();
-        }
-
-        try
-        {
-            var type = queue.Type.ToEnum<UnitType>();
-            starport.AddToQueue(type, user);
-            var unit = new UnitModel(queue.Type.ToEnum<UnitType>(), starport.System, starport.Planet);
-            _unitsService.AddUnit(user, unit);
-            return Ok(unit);
-        }
-        catch (Exception ex)
-        {
-            return BadRequest(ex.Message);
-        }
+        starport.AddToQueue(queueUnitType, user);
+        var newUnit = _unitsService.ConstructSpecificUnit(queueUnitType, starport.System, starport.Planet);
+        _unitsService.AddUnit(user, newUnit);
+        return new UnitsDto(newUnit);
     }
 }

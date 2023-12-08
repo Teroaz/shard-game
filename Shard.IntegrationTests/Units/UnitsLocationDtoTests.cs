@@ -4,6 +4,7 @@ using Shard.Web.ImplementationAPI.Models;
 using Shard.Web.ImplementationAPI.Systems;
 using Shard.Web.ImplementationAPI.Units;
 using Shard.Web.ImplementationAPI.Units.DTOs;
+using Shard.Web.ImplementationAPI.Units.Models;
 
 namespace Shard.IntegrationTests.Units;
 

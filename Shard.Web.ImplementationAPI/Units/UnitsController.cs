@@ -1,7 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Shard.Shared.Core;
 using Shard.Web.ImplementationAPI.Buildings;
-using Shard.Web.ImplementationAPI.Models;
 using Shard.Web.ImplementationAPI.Systems;
 using Shard.Web.ImplementationAPI.Units.DTOs;
 using Shard.Web.ImplementationAPI.Users;
@@ -41,7 +40,7 @@ public class UnitsController : ControllerBase
         var units = _unitsService.GetUnitsByUser(user);
         var unitsDtos = units.Select(unit => new UnitsDto(unit)).ToList();
 
-        return Ok(unitsDtos);
+        return unitsDtos;
     }
 
     [HttpGet("{unitId}")]
@@ -53,7 +52,6 @@ public class UnitsController : ControllerBase
         var unit = _unitsService.GetUnitByIdAndUser(user, unitId);
         if (unit == null) return NotFound();
 
-        // if (unit.EstimatedArrivalTime < DateTime.Now) return new UnitsDto(unit);
 
         var now = _clock.Now;
         var arrival = unit.EstimatedArrivalTime;
@@ -94,7 +92,7 @@ public class UnitsController : ControllerBase
             resourceQuantity = null;
         }
 
-        return Ok(new UnitsLocationDto(unit, resourceQuantity));
+        return new UnitsLocationDto(unit, resourceQuantity);
     }
 
     [HttpPut("{unitId}")]
@@ -106,49 +104,43 @@ public class UnitsController : ControllerBase
         var isValid = _unitsService.IsBodyValid(unitId, unitsBodyDto);
         if (!isValid) return BadRequest();
 
+        if (!unitsBodyDto.Type.IsValidEnumValue<UnitType>()) return BadRequest();
+
         var destinationSystem = unitsBodyDto.DestinationSystem != null ? _systemsService.GetSystem(unitsBodyDto.DestinationSystem) : null;
-        
+        if (destinationSystem == null) return NotFound();
+
         var planets = _systemsService.GetAllSystems().SelectMany(system => system.Planets);
         var destinationPlanet = planets.FirstOrDefault(planet => planet.Name == unitsBodyDto.DestinationPlanet);
 
-        if (destinationSystem == null) return NotFound();
+        var unitType = unitsBodyDto.Type.ToEnum<UnitType>();
 
-        var unit = _unitsService.GetUnitByIdAndUser(user, unitId);
+        var oldUnit = _unitsService.GetUnitByIdAndUser(user, unitId);
 
-        if (!unitsBodyDto.Type.IsValidEnumValue<UnitType>()) return BadRequest();
-
-        var newUnit = new UnitModel(unitId, unitsBodyDto.Type.ToEnum<UnitType>(), destinationSystem, destinationPlanet);
-
-        if (unit == null)
+        if (oldUnit == null)
         {
+            var newUnit = _unitsService.ConstructSpecificUnit(unitType, unitId, destinationSystem, destinationPlanet);
             _unitsService.AddUnit(user, newUnit);
+            return new UnitsDto(newUnit);
         }
-        else
+
+        oldUnit.DestinationSystem = destinationSystem;
+        oldUnit.DestinationPlanet = destinationPlanet;
+
+        _unitsService.UpdateUnit(user, oldUnit);
+
+        if (unitsBodyDto.DestinationSystem != unitsBodyDto.System || unitsBodyDto.DestinationPlanet != unitsBodyDto.Planet)
         {
-            var oldUnit = _unitsService.GetUnitByIdAndUser(user, unitId);
-            if (oldUnit == null) return NotFound();
-            oldUnit.DestinationSystem = destinationSystem;
-            oldUnit.DestinationPlanet = destinationPlanet;
-            
-            _unitsService.UpdateUnit(user, oldUnit);
-            
-            if (unitsBodyDto.DestinationSystem != unitsBodyDto.System || unitsBodyDto.DestinationPlanet != unitsBodyDto.Planet)
+            var userBuildings = _buildingsService.GetBuildingsByUser(user).ToArray();
+            foreach (var building in userBuildings)
             {
-                var userBuildings = _buildingsService.GetBuildingsByUser(user).ToArray();
-                foreach (var building in userBuildings)
-                {
-                    if (building.System.Name != unitsBodyDto.System || building.Planet.Name != unitsBodyDto.Planet) continue;
-                    building.CancellationTokenSource.Cancel();
-                    _buildingsService.RemoveBuilding(user, building);
-                }
+                if (building.System.Name != unitsBodyDto.System || building.Planet.Name != unitsBodyDto.Planet) continue;
+                building.CancellationTokenSource.Cancel();
+                _buildingsService.RemoveBuilding(user, building);
             }
-
-            oldUnit.Move(_clock, destinationSystem, destinationPlanet);
-
-            
-            newUnit = oldUnit;
         }
 
-        return Ok(new UnitsDto(newUnit));
+        oldUnit.Move(_clock, destinationSystem, destinationPlanet);
+
+        return new UnitsDto(oldUnit);
     }
 }

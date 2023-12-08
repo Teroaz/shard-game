@@ -8,14 +8,14 @@ public record UserDto
     
     public string Id { get; init; }
     public string Pseudo { get; init; }
-    public string DateOfCreation { get; init; }
+    public DateTime DateOfCreation { get; init; }
     public Dictionary<ResourceKind, int> ResourcesQuantity { get; }
     
     public UserDto(UserModel userModel)
     {
         Id = userModel.Id;
         Pseudo = userModel.Pseudo;
-        DateOfCreation = userModel.DateOfCreation.ToString("yyyy-MM-dd-HH:mm:ss");
+        DateOfCreation = userModel.DateOfCreation;
         ResourcesQuantity = userModel.ResourcesQuantity;
     }
 }

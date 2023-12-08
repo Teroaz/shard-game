@@ -11,7 +11,7 @@ public class UserDtoTests
         // Arrange
         var id = "123";
         var pseudo = "John Doe";
-        var dateOfCreation = DateTimeOffset.Now.ToString("yyyy-MM-dd-HH:mm:ss");
+        var dateOfCreation = DateTimeOffset.Now;
         var userModel = new UserModel(id, pseudo, DateTime.Now);
 
         // Act

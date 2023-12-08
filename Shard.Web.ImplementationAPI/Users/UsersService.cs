@@ -1,6 +1,7 @@
 using Shard.Web.ImplementationAPI.Models;
 using Shard.Web.ImplementationAPI.Systems;
 using Shard.Web.ImplementationAPI.Units;
+using Shard.Web.ImplementationAPI.Units.Models;
 using Shard.Web.ImplementationAPI.Users.Dtos;
 using Shard.Web.ImplementationAPI.Utils;
 
@@ -8,6 +9,7 @@ namespace Shard.Web.ImplementationAPI.Users;
 
 public class UsersService : IUsersService
 {
+    // 89
     private readonly IUsersRepository _usersRepository;
     private readonly ISystemsService _systemsService;
     private readonly IUnitsRepository _unitsRepository;
@@ -45,11 +47,9 @@ public class UsersService : IUsersService
 
         var randomSystem = _systemsService.GetRandomSystem();
         if (randomSystem == null) throw new Exception("No system found");
-        // var randomPlanet = _systemsService.GetRandomPlanet(randomSystem);
-        // if (randomPlanet == null) throw new Exception("No planet found");
-
-        var scoutUnit = new UnitModel(UnitType.Scout, randomSystem, null);
-        var builderUnit = new UnitModel(UnitType.Builder, randomSystem, null);
+     
+        var scoutUnit = new ScoutUnitModel(randomSystem, null);
+        var builderUnit = new BuilderUnitModel(randomSystem, null);
 
         _usersRepository.AddUser(userModel);
         _unitsRepository.AddUnit(userModel, scoutUnit);
@@ -62,5 +62,12 @@ public class UsersService : IUsersService
         if (user == null) throw new Exception("User not found");
 
         user.Pseudo = userModel.Pseudo;
+        user.DateOfCreation = userModel.DateOfCreation;
+        user.ResourcesQuantity.Clear();
+        foreach (var (key, value) in userModel.ResourcesQuantity)
+        {
+            user.ResourcesQuantity[key] = value;
+        }
+        
     }
 }

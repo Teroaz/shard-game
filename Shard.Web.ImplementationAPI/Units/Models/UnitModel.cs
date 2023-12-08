@@ -1,13 +1,13 @@
 using Shard.Shared.Core;
-using Shard.Web.ImplementationAPI.Units;
+using Shard.Web.ImplementationAPI.Models;
 
-namespace Shard.Web.ImplementationAPI.Models;
+namespace Shard.Web.ImplementationAPI.Units.Models;
 
-public class UnitModel
+public abstract class UnitModel
 {
     public string Id { get; set; }
 
-    public UnitType Type { get; set; }
+    public abstract UnitType Type { get; }
 
     public SystemModel System { get; set; }
 
@@ -21,15 +21,14 @@ public class UnitModel
 
     public Task? MoveTask { get; private set; }
 
-    public UnitModel(UnitType type, SystemModel system, PlanetModel? planet)
-        : this(Guid.NewGuid().ToString(), type, system, planet)
+    protected UnitModel(SystemModel system, PlanetModel? planet)
+        : this(Guid.NewGuid().ToString(), system, planet)
     {
     }
 
-    public UnitModel(string id, UnitType type, SystemModel system, PlanetModel? planet)
+    protected UnitModel(string id, SystemModel system, PlanetModel? planet)
     {
         Id = id;
-        Type = type;
         System = system;
         Planet = planet;
         DestinationSystem = system;
@@ -54,7 +53,7 @@ public class UnitModel
         DestinationSystem = destinationSystem;
         DestinationPlanet = destinationPlanet;
         EstimatedArrivalTime = now.Add(timeToMove);
-        
+
         MoveTask = clock.Delay(timeToMove).ContinueWith(t =>
         {
             System = DestinationSystem;

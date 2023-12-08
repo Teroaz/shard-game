@@ -1,5 +1,6 @@
 using Moq;
 using Shard.Web.ImplementationAPI.Buildings;
+using Shard.Web.ImplementationAPI.Buildings.Models;
 using Shard.Web.ImplementationAPI.Models;
 using Shard.Web.ImplementationAPI.Systems;
 

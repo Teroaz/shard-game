@@ -28,4 +28,19 @@
       <ProjectReference Include="..\Shard.Web.ImplementationAPI\Shard.Web.ImplementationAPI.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Compile Remove="Buildings\**" />
+      <Compile Remove="Units\**" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <EmbeddedResource Remove="Buildings\**" />
+      <EmbeddedResource Remove="Units\**" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Remove="Buildings\**" />
+      <None Remove="Units\**" />
+    </ItemGroup>
+
 </Project>

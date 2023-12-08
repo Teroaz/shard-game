@@ -1,4 +1,4 @@
-﻿using Shard.Web.ImplementationAPI.Models;
+﻿using Shard.Web.ImplementationAPI.Buildings.Models;
 using Shard.Web.ImplementationAPI.Utils;
 
 namespace Shard.Web.ImplementationAPI.Buildings.DTOs;
@@ -21,6 +21,9 @@ public class BuildingDto
         Planet = buildingModel.Planet.Name;
         IsBuilt = buildingModel.IsBuilt;
         EstimatedBuildTime = buildingModel.EstimatedBuildTime;
-        ResourceCategory = buildingModel.ResourceCategory?.ToLowerString();
+        if (buildingModel is MineBuildingModel mineBuildingModel)
+        {
+            ResourceCategory = mineBuildingModel.ResourceCategory.ToLowerString();
+        }
     }
 }

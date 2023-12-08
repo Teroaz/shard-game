@@ -1,7 +1,6 @@
 using Shard.Web.ImplementationAPI.Models;
-using Shard.Web.ImplementationAPI.Systems;
 using Shard.Web.ImplementationAPI.Units.DTOs;
-using Shard.Web.ImplementationAPI.Users;
+using Shard.Web.ImplementationAPI.Units.Models;
 using Shard.Web.ImplementationAPI.Utils;
 
 namespace Shard.Web.ImplementationAPI.Units;
@@ -9,10 +8,10 @@ namespace Shard.Web.ImplementationAPI.Units;
 public class UnitsService : IUnitsService
 {
     private readonly IUnitsRepository _unitsRepository;
-    
+
 
     private readonly ICommon _common;
-    
+
 
     public UnitsService(IUnitsRepository unitsRepository, ICommon common)
     {
@@ -58,5 +57,23 @@ public class UnitsService : IUnitsService
     public List<UnitModel> GetUnitsByUser(UserModel user)
     {
         return _unitsRepository.GetUnitsByUser(user);
+    }
+
+    public UnitModel ConstructSpecificUnit(UnitType unitType, string unitId, SystemModel system, PlanetModel? planet)
+    {
+        return unitType switch
+        {
+            UnitType.Builder => new BuilderUnitModel(unitId, system, planet),
+            UnitType.Scout => new ScoutUnitModel(unitId, system, planet),
+            UnitType.Bomber => new BomberUnitModel(unitId, system, planet),
+            UnitType.Cruiser => new CruiserUnitModel(unitId, system, planet),
+            UnitType.Fighter => new FighterUnitModel(unitId, system, planet),
+            _ => throw new ArgumentOutOfRangeException()
+        };
+    }
+
+    public UnitModel ConstructSpecificUnit(UnitType unitType, SystemModel system, PlanetModel? planet)
+    {
+        return ConstructSpecificUnit(unitType, Guid.NewGuid().ToString(), system, planet);
     }
 }
