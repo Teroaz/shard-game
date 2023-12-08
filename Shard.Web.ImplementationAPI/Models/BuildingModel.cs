@@ -8,7 +8,7 @@ public class BuildingModel
     public string Id { get; set; }
     public UserModel User { get; set; }
     public BuildingType Type { get; set; }
-    public BuildingResourceCategory ResourceCategory { get; set; }
+    public BuildingResourceCategory? ResourceCategory { get; set; }
     public SystemModel System { get; set; }
     public PlanetModel Planet { get; set; }
     public bool IsBuilt { get; set; }
@@ -16,7 +16,8 @@ public class BuildingModel
     public Task? ConstructionTask { get; set; }
     public CancellationTokenSource CancellationTokenSource { get; set; } = new();
 
-    public BuildingModel(string id, UserModel user, BuildingType type, BuildingResourceCategory resourceCategory, SystemModel system, PlanetModel planet)
+    public BuildingModel(string id, UserModel user, BuildingType type, BuildingResourceCategory? resourceCategory,
+        SystemModel system, PlanetModel planet)
     {
         Id = id;
         User = user;
@@ -42,7 +43,7 @@ public class BuildingModel
     {
         var initialDelay = TimeSpan.FromMinutes(1);
         var repeatDelay = TimeSpan.FromMinutes(1);
-        
+
         await clock.Delay(initialDelay, CancellationTokenSource.Token);
 
         while (!CancellationTokenSource.Token.IsCancellationRequested)
@@ -58,7 +59,7 @@ public class BuildingModel
                 Console.WriteLine(e);
                 throw;
             }
-            
+
             await clock.Delay(repeatDelay, CancellationTokenSource.Token);
         }
     }
@@ -66,15 +67,18 @@ public class BuildingModel
 
     private ResourceKind GetResourceToMine()
     {
-        var possibleResources = ResourceCategory.GetResourcesKindByCategory();
+        if (ResourceCategory == null) throw new Exception("No resources to mine");
+        var possibleResources = ResourceCategory?.GetResourcesKindByCategory();
 
         if (possibleResources.Count == 0) throw new Exception("No resources to mine");
         if (possibleResources.Count == 1) return possibleResources.First();
 
         if (ResourceCategory == BuildingResourceCategory.Solid)
         {
-            var planetAvailableResourceQuantity = Planet.ResourceQuantity.Where(resourceQuantity => possibleResources.Contains(resourceQuantity.Key));
-            var targetResource = Planet.ResourceQuantity.First(resourceQuantity => possibleResources.Contains(resourceQuantity.Key));
+            var planetAvailableResourceQuantity =
+                Planet.ResourceQuantity.Where(resourceQuantity => possibleResources.Contains(resourceQuantity.Key));
+            var targetResource =
+                Planet.ResourceQuantity.First(resourceQuantity => possibleResources.Contains(resourceQuantity.Key));
             foreach (var resource in planetAvailableResourceQuantity)
             {
                 // Pick the most abundant resource
@@ -86,7 +90,10 @@ public class BuildingModel
                 // If there are multiple resources with the same quantity, pick the one with the highest rarity
                 if (resource.Value == targetResource.Value)
                 {
-                    targetResource = possibleResources.IndexOf(targetResource.Key) > possibleResources.IndexOf(resource.Key) ? resource : targetResource;
+                    targetResource =
+                        possibleResources.IndexOf(targetResource.Key) > possibleResources.IndexOf(resource.Key)
+                            ? resource
+                            : targetResource;
                 }
             }
 

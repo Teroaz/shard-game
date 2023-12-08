@@ -39,7 +39,7 @@ public class BuildingsController : ControllerBase
         }
 
         if (!createBuildingBodyDto.Type.IsValidEnumValue<BuildingType>()) return BadRequest();
-        if (!createBuildingBodyDto.ResourceCategory.IsValidEnumValue<BuildingResourceCategory>()) return BadRequest();
+        if (createBuildingBodyDto.ResourceCategory != null && !createBuildingBodyDto.ResourceCategory.IsValidEnumValue<BuildingResourceCategory>()) return BadRequest();
 
         var unit = _unitsService.GetUnitByIdAndUser(user, createBuildingBodyDto.BuilderId);
         if (unit?.Planet == null) return BadRequest();
@@ -48,7 +48,7 @@ public class BuildingsController : ControllerBase
             createBuildingBodyDto.Id, 
             user, 
             createBuildingBodyDto.Type.ToEnum<BuildingType>(),
-            createBuildingBodyDto.ResourceCategory.ToEnum<BuildingResourceCategory>(),
+            createBuildingBodyDto.ResourceCategory?.ToEnum<BuildingResourceCategory>(),
             unit.System, 
             unit.Planet
             );
