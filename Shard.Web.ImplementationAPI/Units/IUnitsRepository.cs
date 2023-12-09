@@ -14,4 +14,6 @@ public interface IUnitsRepository
     void RemoveUnit(UserModel user, UnitModel unit);
 
     void UpdateUnit(UserModel user, UnitModel unit);
+    
+    List<FightingUnitModel> GetFightingUnits();
 }

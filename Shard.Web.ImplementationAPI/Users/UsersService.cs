@@ -47,9 +47,9 @@ public class UsersService : IUsersService
 
         var randomSystem = _systemsService.GetRandomSystem();
         if (randomSystem == null) throw new Exception("No system found");
-     
-        var scoutUnit = new ScoutUnitModel(randomSystem, null);
-        var builderUnit = new BuilderUnitModel(randomSystem, null);
+
+        var scoutUnit = new ScoutUnitModel(userModel, randomSystem, null);
+        var builderUnit = new BuilderUnitModel(userModel, randomSystem, null);
 
         _usersRepository.AddUser(userModel);
         _unitsRepository.AddUnit(userModel, scoutUnit);
@@ -68,6 +68,5 @@ public class UsersService : IUsersService
         {
             user.ResourcesQuantity[key] = value;
         }
-        
     }
 }

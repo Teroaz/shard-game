@@ -2,15 +2,29 @@
 
 namespace Shard.Web.ImplementationAPI.Units.Models;
 
-public class FighterUnitModel : UnitModel
+public class FighterUnitModel : FightingUnitModel
 {
+    protected override int AttackDamage => UnitFightingDetails.Fighter.AttackDamage;
+    protected override int AttackPeriod => UnitFightingDetails.Fighter.AttackPeriod;
     public override UnitType Type => UnitType.Fighter;
 
-    public FighterUnitModel(SystemModel system, PlanetModel? planet) : base(system, planet)
+    public FighterUnitModel(UserModel user, SystemModel system, PlanetModel? planet)
+        : this(Guid.NewGuid().ToString(), user, system, planet)
     {
     }
 
-    public FighterUnitModel(string id, SystemModel system, PlanetModel? planet) : base(id, system, planet)
+    public FighterUnitModel(string id, UserModel user, SystemModel system, PlanetModel? planet)
+        : base(id, user, system, planet, UnitFightingDetails.Fighter.InitialHealth)
     {
+    }
+
+    protected override void TakeDamage(FightingUnitModel damageFromUnit, int damage)
+    {
+        Health -= damage;
+    }
+
+    protected override List<UnitType> GetPriorityTargetTypes()
+    {
+        return new List<UnitType> { UnitType.Bomber, UnitType.Fighter, UnitType.Cruiser };
     }
 }

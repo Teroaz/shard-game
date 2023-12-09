@@ -125,12 +125,12 @@ public class BuildingsController : ControllerBase
         if (building == null) return NotFound();
         if (!building.IsBuilt || building is not StarportBuildingModel starport) return BadRequest();
 
-        if (queue.Type.IsValidEnumValue<UnitType>()) return BadRequest();
+        if (!queue.Type.IsValidEnumValue<UnitType>()) return BadRequest();
 
         var queueUnitType = queue.Type.ToEnum<UnitType>();
 
         starport.AddToQueue(queueUnitType, user);
-        var newUnit = _unitsService.ConstructSpecificUnit(queueUnitType, starport.System, starport.Planet);
+        var newUnit = _unitsService.ConstructSpecificUnit(queueUnitType, user, starport.System, starport.Planet);
         _unitsService.AddUnit(user, newUnit);
         return new UnitsDto(newUnit);
     }

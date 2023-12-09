@@ -6,12 +6,13 @@ public class BuilderUnitModel : UnitModel
 {
     public override UnitType Type => UnitType.Builder;
 
-    public BuilderUnitModel(SystemModel system, PlanetModel? planet) : base(system, planet)
+    public BuilderUnitModel(UserModel user, SystemModel system, PlanetModel? planet)
+        : base(user, system, planet)
     {
     }
 
-    public BuilderUnitModel(string id, SystemModel system, PlanetModel? planet) : base(id, system, planet)
+    public BuilderUnitModel(string id, UserModel user, SystemModel system, PlanetModel? planet)
+        : base(id, user, system, planet)
     {
     }
-
 }

@@ -8,10 +8,7 @@ namespace Shard.Web.ImplementationAPI.Units;
 public class UnitsService : IUnitsService
 {
     private readonly IUnitsRepository _unitsRepository;
-
-
     private readonly ICommon _common;
-
 
     public UnitsService(IUnitsRepository unitsRepository, ICommon common)
     {
@@ -59,21 +56,26 @@ public class UnitsService : IUnitsService
         return _unitsRepository.GetUnitsByUser(user);
     }
 
-    public UnitModel ConstructSpecificUnit(UnitType unitType, string unitId, SystemModel system, PlanetModel? planet)
+    public UnitModel ConstructSpecificUnit(UnitType unitType, UserModel user, string unitId, SystemModel system, PlanetModel? planet)
     {
         return unitType switch
         {
-            UnitType.Builder => new BuilderUnitModel(unitId, system, planet),
-            UnitType.Scout => new ScoutUnitModel(unitId, system, planet),
-            UnitType.Bomber => new BomberUnitModel(unitId, system, planet),
-            UnitType.Cruiser => new CruiserUnitModel(unitId, system, planet),
-            UnitType.Fighter => new FighterUnitModel(unitId, system, planet),
+            UnitType.Builder => new BuilderUnitModel(unitId, user, system, planet),
+            UnitType.Scout => new ScoutUnitModel(unitId, user, system, planet),
+            UnitType.Bomber => new BomberUnitModel(unitId, user, system, planet),
+            UnitType.Cruiser => new CruiserUnitModel(unitId, user, system, planet),
+            UnitType.Fighter => new FighterUnitModel(unitId, user, system, planet),
             _ => throw new ArgumentOutOfRangeException()
         };
     }
 
-    public UnitModel ConstructSpecificUnit(UnitType unitType, SystemModel system, PlanetModel? planet)
+    public UnitModel ConstructSpecificUnit(UnitType unitType, UserModel user, SystemModel system, PlanetModel? planet)
     {
-        return ConstructSpecificUnit(unitType, Guid.NewGuid().ToString(), system, planet);
+        return ConstructSpecificUnit(unitType, user, Guid.NewGuid().ToString(), system, planet);
+    }
+
+    public List<FightingUnitModel> GetFightingUnits()
+    {
+        return _unitsRepository.GetFightingUnits();
     }
 }

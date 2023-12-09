@@ -3,6 +3,7 @@ using Shard.Shared.Core;
 using Shard.Web.ImplementationAPI.Buildings;
 using Shard.Web.ImplementationAPI.Systems;
 using Shard.Web.ImplementationAPI.Units.DTOs;
+using Shard.Web.ImplementationAPI.Units.Models;
 using Shard.Web.ImplementationAPI.Users;
 using Shard.Web.ImplementationAPI.Utils;
 
@@ -52,7 +53,6 @@ public class UnitsController : ControllerBase
         var unit = _unitsService.GetUnitByIdAndUser(user, unitId);
         if (unit == null) return NotFound();
 
-
         var now = _clock.Now;
         var arrival = unit.EstimatedArrivalTime;
 
@@ -85,14 +85,8 @@ public class UnitsController : ControllerBase
 
         var unit = _unitsService.GetUnitByIdAndUser(user, unitId);
         if (unit == null) return NotFound();
-
-        var resourceQuantity = unit.Planet?.ResourceQuantity;
-        if (unit.Type == UnitType.Builder)
-        {
-            resourceQuantity = null;
-        }
-
-        return new UnitsLocationDto(unit, resourceQuantity);
+        
+        return new UnitsLocationDto(unit);
     }
 
     [HttpPut("{unitId}")]
@@ -106,22 +100,31 @@ public class UnitsController : ControllerBase
 
         if (!unitsBodyDto.Type.IsValidEnumValue<UnitType>()) return BadRequest();
 
-        var destinationSystem = unitsBodyDto.DestinationSystem != null ? _systemsService.GetSystem(unitsBodyDto.DestinationSystem) : null;
-        if (destinationSystem == null) return NotFound();
-
-        var planets = _systemsService.GetAllSystems().SelectMany(system => system.Planets);
-        var destinationPlanet = planets.FirstOrDefault(planet => planet.Name == unitsBodyDto.DestinationPlanet);
-
+        // var destinationSystem = unitsBodyDto.DestinationSystem != null ? _systemsService.GetSystem(unitsBodyDto.DestinationSystem) : null;
+        // if (destinationSystem == null) return NotFound();
+        
+        var baseSystem = _systemsService.GetSystem(unitsBodyDto.System);
+        if (baseSystem == null) return NotFound();
+        var basePlanet = baseSystem.Planets.FirstOrDefault(planet => planet.Name == unitsBodyDto.Planet);
+        
         var unitType = unitsBodyDto.Type.ToEnum<UnitType>();
 
         var oldUnit = _unitsService.GetUnitByIdAndUser(user, unitId);
 
         if (oldUnit == null)
         {
-            var newUnit = _unitsService.ConstructSpecificUnit(unitType, unitId, destinationSystem, destinationPlanet);
+            var newUnit = _unitsService.ConstructSpecificUnit(unitType, user, unitId, baseSystem, basePlanet);
             _unitsService.AddUnit(user, newUnit);
+            if (newUnit is FightingUnitModel fightingUnitModel)
+            {
+                fightingUnitModel.StartCombat(_clock, _unitsService);
+            }
             return new UnitsDto(newUnit);
         }
+        
+        var destinationSystem = _systemsService.GetSystem(unitsBodyDto.DestinationSystem);
+        var planets = _systemsService.GetAllSystems().SelectMany(system => system.Planets);
+        var destinationPlanet = planets.FirstOrDefault(planet => planet.Name == unitsBodyDto.DestinationPlanet);
 
         oldUnit.DestinationSystem = destinationSystem;
         oldUnit.DestinationPlanet = destinationPlanet;

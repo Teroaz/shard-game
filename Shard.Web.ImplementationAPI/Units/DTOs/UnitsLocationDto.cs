@@ -12,11 +12,11 @@ public class UnitsLocationDto
     
     public IReadOnlyDictionary<ResourceKind, int>? ResourcesQuantity { get; } 
 
-    public UnitsLocationDto(UnitModel unitModel, IReadOnlyDictionary<ResourceKind, int>? resourceQuantity)
+    public UnitsLocationDto(UnitModel unitModel)
     {
         System = unitModel.System.Name;
         Planet = unitModel.Planet?.Name;
-        ResourcesQuantity = resourceQuantity;
+        ResourcesQuantity = unitModel.Type == UnitType.Scout ? unitModel.Planet?.ResourceQuantity : null;
     }
     
 }

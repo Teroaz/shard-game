@@ -66,13 +66,12 @@ public class MineBuildingModel : BuildingModel
 
     private async Task StartExtraction(IClock clock)
     {
-        var initialDelay = TimeSpan.FromMinutes(1);
         var repeatDelay = TimeSpan.FromMinutes(1);
-
-        await clock.Delay(initialDelay, CancellationTokenSource.Token);
-
+        
         while (!CancellationTokenSource.Token.IsCancellationRequested)
         {
+            await clock.Delay(repeatDelay, CancellationTokenSource.Token);
+
             var resourceToMine = GetResourceToMine();
 
             try
@@ -84,8 +83,6 @@ public class MineBuildingModel : BuildingModel
                 Console.WriteLine(e);
                 throw;
             }
-
-            await clock.Delay(repeatDelay, CancellationTokenSource.Token);
         }
     }
 }

@@ -6,14 +6,14 @@ namespace Shard.Web.ImplementationAPI.Units.Models;
 public abstract class UnitModel
 {
     public string Id { get; set; }
-
+    public UserModel User { get; set; }
     public abstract UnitType Type { get; }
 
     public SystemModel System { get; set; }
 
     public PlanetModel? Planet { get; set; }
 
-    public SystemModel DestinationSystem { get; set; }
+    public SystemModel? DestinationSystem { get; set; }
 
     public PlanetModel? DestinationPlanet { get; set; }
 
@@ -21,14 +21,15 @@ public abstract class UnitModel
 
     public Task? MoveTask { get; private set; }
 
-    protected UnitModel(SystemModel system, PlanetModel? planet)
-        : this(Guid.NewGuid().ToString(), system, planet)
+    protected UnitModel(UserModel user, SystemModel system, PlanetModel? planet)
+        : this(Guid.NewGuid().ToString(), user, system, planet)
     {
     }
 
-    protected UnitModel(string id, SystemModel system, PlanetModel? planet)
+    protected UnitModel(string id, UserModel user, SystemModel system, PlanetModel? planet)
     {
         Id = id;
+        User = user;
         System = system;
         Planet = planet;
         DestinationSystem = system;

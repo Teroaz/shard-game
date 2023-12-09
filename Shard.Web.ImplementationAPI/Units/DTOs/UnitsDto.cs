@@ -1,5 +1,4 @@
 using Shard.Shared.Core;
-using Shard.Web.ImplementationAPI.Models;
 using Shard.Web.ImplementationAPI.Units.Models;
 using Shard.Web.ImplementationAPI.Utils;
 
@@ -20,8 +19,10 @@ public class UnitsDto
     public string? DestinationPlanet { get; init; }
 
     public string? EstimatedArrivalTime { get; init; }
-    
+
     public Dictionary<ResourceKind, int>? ResourcesQuantity { get; set; }
+
+    public int? Health { get; set; }
 
     public UnitsDto(UnitModel unitModel)
     {
@@ -33,6 +34,10 @@ public class UnitsDto
         DestinationPlanet = unitModel.DestinationPlanet?.Name;
         EstimatedArrivalTime = unitModel.EstimatedArrivalTime.ToString("yyyy-MM-ddTHH:mm:ss");
         ResourcesQuantity = unitModel.Planet?.ResourceQuantity;
+        
+        if (unitModel is FightingUnitModel fightingUnitModel)
+        {
+            Health = fightingUnitModel.Health;
+        }
     }
-
 }
