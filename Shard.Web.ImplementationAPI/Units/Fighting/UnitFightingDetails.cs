@@ -1,4 +1,4 @@
-﻿namespace Shard.Web.ImplementationAPI.Units;
+﻿namespace Shard.Web.ImplementationAPI.Units.Fighting;
 
 public static class UnitFightingDetails
 {

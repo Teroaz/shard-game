@@ -5,6 +5,7 @@ using Shard.Web.ImplementationAPI.Buildings;
 using Shard.Web.ImplementationAPI.Handler;
 using Shard.Web.ImplementationAPI.Systems;
 using Shard.Web.ImplementationAPI.Units;
+using Shard.Web.ImplementationAPI.Units.Fighting;
 using Shard.Web.ImplementationAPI.Users;
 using Shard.Web.ImplementationAPI.Utils;
 using SystemClock = Shard.Shared.Core.SystemClock;
@@ -34,6 +35,8 @@ builder.Services.AddSingleton<IClock, SystemClock>();
 
 builder.Services.Configure<MapGeneratorOptions>(options => options.Seed = configuration["MapGenerator:Options:Seed"]);
 builder.Services.AddSingleton<MapGenerator>();
+
+builder.Services.AddHostedService<UnitsArenaHostedService>();
 
 builder.Services.AddAuthentication("BasicAuthentication")
     .AddScheme<AuthenticationSchemeOptions, BasicAuthenticationHandler>("BasicAuthentication", null);

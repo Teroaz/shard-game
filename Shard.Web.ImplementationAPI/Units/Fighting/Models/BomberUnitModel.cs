@@ -1,11 +1,11 @@
 ﻿using Shard.Web.ImplementationAPI.Models;
 
-namespace Shard.Web.ImplementationAPI.Units.Models;
+namespace Shard.Web.ImplementationAPI.Units.Fighting.Models;
 
 public class BomberUnitModel : FightingUnitModel
 {
     protected override int AttackDamage => UnitFightingDetails.Bomber.AttackDamage;
-    protected override int AttackPeriod => UnitFightingDetails.Bomber.AttackPeriod;
+    public override int AttackPeriod => UnitFightingDetails.Bomber.AttackPeriod;
     public override UnitType Type => UnitType.Bomber;
 
     public BomberUnitModel(UserModel user, SystemModel system, PlanetModel? planet)
