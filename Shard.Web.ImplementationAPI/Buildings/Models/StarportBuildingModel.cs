@@ -19,7 +19,7 @@ public class StarportBuildingModel : BuildingModel
     {
     }
 
-    private static Dictionary<ResourceKind, int> GetStarportCosts(UnitType unit)
+    private static Dictionary<ResourceKind, int> GetCosts(UnitType unit)
     {
         var costs = new Dictionary<UnitType, Dictionary<ResourceKind, int>>
         {
@@ -68,17 +68,23 @@ public class StarportBuildingModel : BuildingModel
         return costs[unit];
     }
 
-    public async void AddToQueue(UnitType unitType, UserModel user)
+    public void Add(UnitType unitType, UserModel user)
     {
-        var resourcesToConsume = GetStarportCosts(unitType);
-        if (Queue != null && user.HasEnoughResources(resourcesToConsume))
+        if (Queue == null)
         {
-            Queue.Add(unitType);
-            user.ConsumeResources(resourcesToConsume);
+            throw new InvalidOperationException("Queue is not initialized.");
         }
-        else
+
+        var resourcesToConsume = GetCosts(unitType);
+
+        if (!user.HasEnoughResources(resourcesToConsume))
         {
-            throw new Exception("Not enough resources");
+            throw new InvalidOperationException("Not enough resources.");
         }
+
+        Queue.Add(unitType);
+        user.ConsumeResources(resourcesToConsume);
     }
+
+
 }

@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Shard.Shared.Core;
 using Shard.Web.ImplementationAPI.Buildings.DTOs;
 using Shard.Web.ImplementationAPI.Buildings.Models;
@@ -115,6 +116,7 @@ public class BuildingsController : ControllerBase
         return new BuildingDto(building);
     }
 
+    [Authorize]
     [HttpPost("{starportId}/queue")]
     public ActionResult<UnitsDto> AddToQueue(string userId, string starportId, [FromBody] QueueDto queue)
     {
@@ -129,9 +131,16 @@ public class BuildingsController : ControllerBase
 
         var queueUnitType = queue.Type.ToEnum<UnitType>();
 
-        starport.AddToQueue(queueUnitType, user);
-        var newUnit = _unitsService.ConstructSpecificUnit(queueUnitType, user, starport.System, starport.Planet);
-        _unitsService.AddUnit(user, newUnit);
-        return new UnitsDto(newUnit);
+        try
+        {
+            starport.Add(queueUnitType, user);
+            var newUnit = _unitsService.ConstructSpecificUnit(queueUnitType, user, starport.System, starport.Planet);
+            _unitsService.AddUnit(user, newUnit);
+            return new UnitsDto(newUnit);
+        }
+        catch (Exception e)
+        {
+            return BadRequest(e.Message);
+        }
     }
 }
