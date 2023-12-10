@@ -55,7 +55,7 @@ public class UsersControllerTests
         // Arrange
         var userId = "123";
         var userBody = new UserBodyDto { Id = userId, Pseudo = "New Name" };
-        _mockUserService.Setup(s => s.IsBodyValid(userId, userBody)).Returns(false);
+        _mockUserService.Setup(s => s.IsBodyValid(userId, userBody, false)).Returns(false);
 
         // Act
         var result = _controller.PutUser(userId, userBody);
@@ -71,7 +71,7 @@ public class UsersControllerTests
         var userId = "123";
         var userBody = new UserBodyDto { Id = userId, Pseudo = "New Name" };
         var existingUserModel = new UserModel(userId, "Old Name");
-        _mockUserService.Setup(s => s.IsBodyValid(userId, userBody)).Returns(true);
+        _mockUserService.Setup(s => s.IsBodyValid(userId, userBody, false)).Returns(true);
         _mockUserService.Setup(s => s.GetUserById(userId)).Returns(existingUserModel);
 
         // Act
@@ -89,7 +89,7 @@ public class UsersControllerTests
         // Arrange
         var userId = "456";
         var userBody = new UserBodyDto { Id = userId, Pseudo = "New Name" };
-        _mockUserService.Setup(s => s.IsBodyValid(userId, userBody)).Returns(true);
+        _mockUserService.Setup(s => s.IsBodyValid(userId, userBody, false)).Returns(true);
         _mockUserService.Setup(s => s.GetUserById(userId)).Returns((UserModel)null);
 
         // Act

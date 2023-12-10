@@ -1,3 +1,4 @@
+using Shard.Web.ImplementationAPI.Enums;
 using Shard.Web.ImplementationAPI.Models;
 using Shard.Web.ImplementationAPI.Systems;
 using Shard.Web.ImplementationAPI.Units;
@@ -30,9 +31,9 @@ public class UsersService : IUsersService
         return user;
     }
 
-    public bool IsBodyValid(string id, UserBodyDto? userBody)
+    public bool IsBodyValid(string id, UserBodyDto? userBody, bool isAdmin = false)
     {
-        if (userBody == null || id != userBody.Id || string.IsNullOrWhiteSpace(userBody.Pseudo))
+        if (userBody == null || (id != userBody.Id && !isAdmin) || string.IsNullOrWhiteSpace(userBody.Pseudo))
         {
             return false;
         }

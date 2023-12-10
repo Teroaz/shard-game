@@ -26,7 +26,7 @@ public class UsersController : ControllerBase
     [HttpPut("{id}")]
     public ActionResult<UserDto> PutUser(string id, [FromBody] UserBodyDto userBody)
     {
-        var isValid = _userService.IsBodyValid(id, userBody);
+        var isValid = _userService.IsBodyValid(id, userBody, HttpContext.User.IsInRole(Roles.Admin));
         if (!isValid) return BadRequest();
 
         var user = _userService.GetUserById(id);
@@ -38,11 +38,8 @@ public class UsersController : ControllerBase
         }
         else
         {
-            if (HttpContext.User.IsInRole(Roles.Admin))
-            {
-                user = new UserModel(userBody.Id, userBody.Pseudo);
-                _userService.UpdateUser(id, user);
-            }
+            user = new UserModel(userBody.Id, userBody.Pseudo);
+            _userService.UpdateUser(id, user);
         }
         
         
