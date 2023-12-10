@@ -3,6 +3,7 @@ using Shard.Shared.Core;
 using Shard.Web.ImplementationAPI.Buildings;
 using Shard.Web.ImplementationAPI.Systems;
 using Shard.Web.ImplementationAPI.Units.DTOs;
+using Shard.Web.ImplementationAPI.Units.Fighting.Models;
 using Shard.Web.ImplementationAPI.Units.Models;
 using Shard.Web.ImplementationAPI.Users;
 using Shard.Web.ImplementationAPI.Utils;
@@ -115,10 +116,6 @@ public class UnitsController : ControllerBase
         {
             var newUnit = _unitsService.ConstructSpecificUnit(unitType, user, unitId, baseSystem, basePlanet);
             _unitsService.AddUnit(user, newUnit);
-            if (newUnit is FightingUnitModel fightingUnitModel)
-            {
-                fightingUnitModel.StartCombat(_clock, _unitsService);
-            }
             return new UnitsDto(newUnit);
         }
         

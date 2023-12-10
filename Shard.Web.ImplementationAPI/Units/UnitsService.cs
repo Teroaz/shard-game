@@ -1,5 +1,6 @@
 using Shard.Web.ImplementationAPI.Models;
 using Shard.Web.ImplementationAPI.Units.DTOs;
+using Shard.Web.ImplementationAPI.Units.Fighting.Models;
 using Shard.Web.ImplementationAPI.Units.Models;
 using Shard.Web.ImplementationAPI.Utils;
 

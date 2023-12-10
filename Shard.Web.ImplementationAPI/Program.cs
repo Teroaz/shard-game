@@ -2,7 +2,7 @@ using System.Text.Json;
 using Microsoft.AspNetCore.Authentication;
 using Shard.Shared.Core;
 using Shard.Web.ImplementationAPI.Buildings;
-using Shard.Web.ImplementationAPI.Handlers;
+using Shard.Web.ImplementationAPI.Handler;
 using Shard.Web.ImplementationAPI.Systems;
 using Shard.Web.ImplementationAPI.Units;
 using Shard.Web.ImplementationAPI.Users;
@@ -34,6 +34,8 @@ builder.Services.AddSingleton<IClock, SystemClock>();
 
 builder.Services.Configure<MapGeneratorOptions>(options => options.Seed = configuration["MapGenerator:Options:Seed"]);
 builder.Services.AddSingleton<MapGenerator>();
+
+builder.Services.AddHostedService<UnitsArenaHostedService>();
 
 builder.Services.AddAuthentication("Basic").AddScheme<AuthenticationSchemeOptions, BasicAuthenticationHandler>("Basic", null);
 

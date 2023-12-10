@@ -1,4 +1,5 @@
 using Shard.Shared.Core;
+using Shard.Web.ImplementationAPI.Units.Fighting.Models;
 using Shard.Web.ImplementationAPI.Units.Models;
 using Shard.Web.ImplementationAPI.Utils;
 
