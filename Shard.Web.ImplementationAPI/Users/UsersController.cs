@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Shard.Shared.Core;
 using Shard.Web.ImplementationAPI.Enums;
@@ -25,11 +26,14 @@ public class UsersController : ControllerBase
         var user = _userService.GetUserById(id);
         return user == null ? NotFound() : Ok(new UserDto(user));
     }
-
+    
+    [Authorize]
+    [AllowAnonymous]
     [HttpPut("{id}")]
     public ActionResult<UserDto> PutUser(string id, [FromBody] UserBodyDto userBody)
     {
-        var isValid = _userService.IsBodyValid(id, userBody, HttpContext.User.IsInRole(Roles.Admin));
+        var isAdmin = HttpContext.User.IsInRole(Roles.Admin);
+        var isValid = _userService.IsBodyValid(id, userBody, isAdmin);
         if (!isValid) return BadRequest();
 
         var user = _userService.GetUserById(id);
@@ -42,6 +46,12 @@ public class UsersController : ControllerBase
         else
         {
             user = new UserModel(userBody.Id, userBody.Pseudo, user.DateOfCreation);
+
+            if (isAdmin && userBody.ResourcesQuantity != null)
+            {
+                user.ResourcesQuantity = userBody.ResourcesQuantity;
+            }
+            
             _userService.UpdateUser(id, user);
         }
         

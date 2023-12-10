@@ -8,5 +8,5 @@ public class UserBodyDto
     
     public string Pseudo { get; init; }
     
-    public Dictionary<string, int>? ResourcesQuantity { get; init; }
+    public Dictionary<ResourceKind, int>? ResourcesQuantity { get; init; }
 }

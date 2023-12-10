@@ -13,10 +13,13 @@ using SystemClock = Shard.Shared.Core.SystemClock;
 var builder = WebApplication.CreateBuilder(args);
 var configuration = builder.Configuration;
 
+builder.Services.AddAuthentication("Basic").AddScheme<AuthenticationSchemeOptions, BasicAuthenticationHandler>("Basic", null);
+
 builder.Services
     .AddControllers()
     .AddJsonOptions(options => options.JsonSerializerOptions.DictionaryKeyPolicy = JsonNamingPolicy.CamelCase);
 builder.Services.AddEndpointsApiExplorer();
+
 
 builder.Services.AddSingleton<ISystemsRepository, SystemsRepository>();
 builder.Services.AddSingleton<ISystemsService, SystemsService>();
@@ -38,8 +41,6 @@ builder.Services.AddSingleton<MapGenerator>();
 
 builder.Services.AddHostedService<UnitsArenaHostedService>();
 
-builder.Services.AddAuthentication("Basic").AddScheme<AuthenticationSchemeOptions, BasicAuthenticationHandler>("Basic", null);
-
 
 var app = builder.Build();
 
@@ -53,6 +54,7 @@ app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
 app.UseEndpoints(endpoints => { endpoints.MapControllers(); });
+
 
 app.Run();
 
