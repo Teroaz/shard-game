@@ -4,6 +4,7 @@ using System.Text;
 using System.Text.Encodings.Web;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.Extensions.Options;
+using Shard.Shared.Core;
 using Shard.Web.ImplementationAPI.Enums;
 using Shard.Web.ImplementationAPI.Models;
 
@@ -55,6 +56,6 @@ public class BasicAuthenticationHandler : AuthenticationHandler<AuthenticationSc
 
     private UserModel? ValidateCredentials(string pseudo, string password)
     {
-        return pseudo == "admin" && password == "password" ? new UserModel(pseudo, password) : null;
+        return pseudo == "admin" && password == "password" ? new UserModel(pseudo, password, DateTime.Now) : null;
     }
 }

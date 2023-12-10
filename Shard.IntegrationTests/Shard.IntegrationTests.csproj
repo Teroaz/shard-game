@@ -31,16 +31,19 @@
     <ItemGroup>
       <Compile Remove="Buildings\**" />
       <Compile Remove="Units\**" />
+      <Compile Remove="Users\**" />
     </ItemGroup>
 
     <ItemGroup>
       <EmbeddedResource Remove="Buildings\**" />
       <EmbeddedResource Remove="Units\**" />
+      <EmbeddedResource Remove="Users\**" />
     </ItemGroup>
 
     <ItemGroup>
       <None Remove="Buildings\**" />
       <None Remove="Units\**" />
+      <None Remove="Users\**" />
     </ItemGroup>
 
 </Project>

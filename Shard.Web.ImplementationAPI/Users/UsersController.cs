@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Shard.Shared.Core;
 using Shard.Web.ImplementationAPI.Enums;
 using Shard.Web.ImplementationAPI.Models;
 using Shard.Web.ImplementationAPI.Users.Dtos;
@@ -10,10 +11,12 @@ namespace Shard.Web.ImplementationAPI.Users;
 public class UsersController : ControllerBase
 {
     private readonly IUsersService _userService;
+    private IClock _clock;
 
-    public UsersController(IUsersService userService)
+    public UsersController(IUsersService userService, IClock clock)
     {
         _userService = userService;
+        _clock = clock;
     }
 
     [HttpGet("{id}")]
@@ -33,12 +36,12 @@ public class UsersController : ControllerBase
 
         if (user == null)
         {
-            user = new UserModel(userBody.Id, userBody.Pseudo);
+            user = new UserModel(userBody.Id, userBody.Pseudo, _clock.Now);
             _userService.CreateUser(user);
         }
         else
         {
-            user = new UserModel(userBody.Id, userBody.Pseudo);
+            user = new UserModel(userBody.Id, userBody.Pseudo, user.DateOfCreation);
             _userService.UpdateUser(id, user);
         }
         

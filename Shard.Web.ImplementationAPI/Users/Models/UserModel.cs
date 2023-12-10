@@ -10,14 +10,10 @@ public class UserModel
 
     public DateTime DateOfCreation { get; set; }
 
-    public Dictionary<ResourceKind, int> ResourcesQuantity { get; }
+    public Dictionary<ResourceKind, int> ResourcesQuantity { get; set; }
 
 
-    public UserModel(string pseudo) : this(Guid.NewGuid().ToString(), pseudo)
-    {
-    }
-
-    public UserModel(string id, string pseudo) : this(id, pseudo, DateTime.Now)
+    public UserModel(string pseudo, IClock clock) : this(Guid.NewGuid().ToString(), pseudo, clock.Now)
     {
     }
 
@@ -67,7 +63,7 @@ public class UserModel
     {
         foreach (KeyValuePair<ResourceKind, int> resource in resources)
         {
-            ResourcesQuantity[resource.Key] = ResourcesQuantity[resource.Key] - resource.Value;
+            ResourcesQuantity[resource.Key] -= resource.Value;
         }
     }
 }

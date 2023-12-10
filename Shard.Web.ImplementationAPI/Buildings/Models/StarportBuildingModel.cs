@@ -1,5 +1,6 @@
 ﻿using Shard.Shared.Core;
 using Shard.Web.ImplementationAPI.Models;
+using Shard.Web.ImplementationAPI.Systems.Models;
 using Shard.Web.ImplementationAPI.Units;
 
 namespace Shard.Web.ImplementationAPI.Buildings.Models;

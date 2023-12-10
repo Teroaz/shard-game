@@ -1,6 +1,6 @@
 ﻿using Shard.Shared.Core;
 
-namespace Shard.Web.ImplementationAPI.Models;
+namespace Shard.Web.ImplementationAPI.Systems.Models;
 
 public class PlanetModel
 {
