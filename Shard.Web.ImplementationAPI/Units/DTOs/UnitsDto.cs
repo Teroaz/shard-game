@@ -11,9 +11,11 @@ public class UnitsDto
 
     public string Type { get; init; }
 
-    public string System { get; init; }
+    public string? System { get; init; }
 
     public string? Planet { get; init; }
+
+    public string? DestinationShard { get; set; }
 
     public string DestinationSystem { get; init; }
 
@@ -29,13 +31,14 @@ public class UnitsDto
     {
         Id = unitModel.Id;
         Type = unitModel.Type.ToLowerString();
-        System = unitModel.System.Name;
+        System = unitModel.System?.Name;
         Planet = unitModel.Planet?.Name;
-        DestinationSystem = unitModel.DestinationSystem.Name;
+        DestinationSystem = unitModel.DestinationSystem?.Name;
         DestinationPlanet = unitModel.DestinationPlanet?.Name;
+        DestinationShard = unitModel.DestinationShard;
         EstimatedArrivalTime = unitModel.EstimatedArrivalTime.ToString("yyyy-MM-ddTHH:mm:ss");
         ResourcesQuantity = unitModel.Planet?.ResourceQuantity;
-        
+
         if (unitModel is FightingUnitModel fightingUnitModel)
         {
             Health = fightingUnitModel.Health;

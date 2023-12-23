@@ -8,10 +8,11 @@ public class UnitsBodyDto
 
     public string Type { get; init; }
 
-    public string System { get; init; }
+    public string? System { get; init; }
 
     public string? Planet { get; init; }
 
+    public string? DestinationShard { get; set; }
     public string? DestinationSystem { get; init; }
 
     public string? DestinationPlanet { get; init; }

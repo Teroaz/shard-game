@@ -45,8 +45,9 @@ public class UnitsService : IUnitsService
         if (
             unitsBodyDto == null ||
             id != unitsBodyDto.Id ||
-            string.IsNullOrWhiteSpace(unitsBodyDto.Type) ||
-            string.IsNullOrWhiteSpace(unitsBodyDto.System)
+            string.IsNullOrWhiteSpace(unitsBodyDto.Type) 
+            // ||
+            // string.IsNullOrWhiteSpace(unitsBodyDto.System)
         )
         {
             return false;

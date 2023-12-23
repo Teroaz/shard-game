@@ -8,6 +8,7 @@ using Shard.Web.ImplementationAPI.Units.DTOs;
 using Shard.Web.ImplementationAPI.Units.Fighting.Models;
 using Shard.Web.ImplementationAPI.Users;
 using Shard.Web.ImplementationAPI.Utils;
+using Shard.Web.ImplementationAPI.Wormholes;
 
 namespace Shard.Web.ImplementationAPI.Units;
 
@@ -23,15 +24,18 @@ public class UnitsController : ControllerBase
 
     private readonly IBuildingsService _buildingsService;
 
+    private readonly IWormholesService _wormholesService;
+
     private readonly IClock _clock;
 
     public UnitsController(IUnitsService unitsService, IUsersService userService, ISystemsService systemsService,
-        IBuildingsService buildingsService, IClock clock)
+        IBuildingsService buildingsService, IWormholesService wormholesService, IClock clock)
     {
         _unitsService = unitsService;
         _userService = userService;
         _systemsService = systemsService;
         _buildingsService = buildingsService;
+        _wormholesService = wormholesService;
         _clock = clock;
     }
 
@@ -94,37 +98,59 @@ public class UnitsController : ControllerBase
 
     [Authorize]
     [HttpPut("{unitId}")]
-    public ActionResult<UnitsDto> Put(string userId, string unitId, [FromBody] UnitsBodyDto unitsBodyDto)
+    public async Task<ActionResult<UnitsDto>> Put(string userId, string unitId, [FromBody] UnitsBodyDto unitsBodyDto)
     {
         var user = _userService.GetUserById(userId);
         if (user == null) return NotFound();
 
         var isValid = _unitsService.IsBodyValid(unitId, unitsBodyDto);
-        if (!isValid) return BadRequest();
+        if (!isValid) return BadRequest("Invalid body");
 
-        if (!unitsBodyDto.Type.IsValidEnumValue<UnitType>()) return BadRequest();
+        if (!unitsBodyDto.Type.IsValidEnumValue<UnitType>()) return BadRequest("Invalid unit type");
 
         var baseSystem = _systemsService.GetSystem(unitsBodyDto.System);
-        if (baseSystem == null) return NotFound();
-        var basePlanet = baseSystem.Planets.FirstOrDefault(planet => planet.Name == unitsBodyDto.Planet);
+        // if (baseSystem == null) return NotFound();
+        var basePlanet = baseSystem?.Planets.FirstOrDefault(planet => planet.Name == unitsBodyDto.Planet);
 
         var unitType = unitsBodyDto.Type.ToEnum<UnitType>();
         var resourcesQuantity = unitsBodyDto.ResourcesQuantity;
 
         var oldUnit = _unitsService.GetUnitByIdAndUser(user, unitId);
+        var newUnit = _unitsService.ConstructSpecificUnit(unitType, user, unitId, baseSystem, basePlanet, resourcesQuantity);
 
         if (oldUnit == null)
         {
-            if (HttpContext.User.IsInRole(Roles.Admin))
+            if (HttpContext.User.IsInRole(Roles.Admin) || HttpContext.User.IsInRole(Roles.Shard))
             {
-                var newUnit = _unitsService.ConstructSpecificUnit(unitType, user, unitId, baseSystem, basePlanet, resourcesQuantity);
+                if (HttpContext.User.IsInRole(Roles.Shard))
+                {
+                    var shard = _wormholesService.GetShardData(HttpContext.User.Identity.Name);
+                    newUnit.System = _systemsService.GetSystem(shard.Value.System);
+                }
+
                 _unitsService.AddUnit(user, newUnit);
-                return new UnitsDto(newUnit);
             }
-            else
+            else if (HttpContext.User.IsInRole(Roles.User))
             {
                 return Unauthorized();
             }
+            else
+            {
+                return Forbid("You are not allowed to create units");
+            }
+
+            return new UnitsDto(newUnit);
+        }
+
+        var destinationShard = unitsBodyDto.DestinationShard;
+
+        if (destinationShard != null)
+        {
+            if (!HttpContext.User.IsInRole(Roles.User) && !HttpContext.User.IsInRole(Roles.Admin)) return Forbid("You are not allowed to jump shards");
+            
+            var unitUri = await _wormholesService.Jump(user, oldUnit, destinationShard);
+            _unitsService.RemoveUnit(user, oldUnit);
+            return RedirectPermanentPreserveMethod(unitUri);
         }
 
         var destinationSystem = _systemsService.GetSystem(unitsBodyDto.DestinationSystem);
@@ -133,16 +159,16 @@ public class UnitsController : ControllerBase
 
         oldUnit.DestinationSystem = destinationSystem;
         oldUnit.DestinationPlanet = destinationPlanet;
-        
+
         _unitsService.UpdateUnit(user, oldUnit);
 
         if (resourcesQuantity != null)
         {
-            if (unitType != UnitType.Cargo)
+            if (oldUnit is not CargoUnitModel cargoUnitModel)
             {
                 return BadRequest();
             }
-            
+
             var starport = _buildingsService.GetBuildingsByUser(user)
                 .Find(building =>
                     building.Planet.Name == unitsBodyDto.Planet && building.Type == BuildingType.Starport);
@@ -152,14 +178,13 @@ public class UnitsController : ControllerBase
                 return BadRequest("No starport on this planet");
             }
 
-            Dictionary<ResourceKind, int> resources = (oldUnit as CargoUnitModel)
-                .LoadUnloadResources(unitsBodyDto.ResourcesQuantity);
+            var resources = cargoUnitModel.LoadUnloadResources(resourcesQuantity);
 
             var isSuccess = user.TrySubtractResources(resources);
-            
-            if(!isSuccess) return BadRequest("Not enough resources");
-            
-            oldUnit.ResourcesQuantity = resourcesQuantity;
+
+            if (!isSuccess) return BadRequest("Not enough resources");
+
+            cargoUnitModel.ResourcesQuantity = resourcesQuantity;
         }
 
         if (unitsBodyDto.DestinationSystem != unitsBodyDto.System ||

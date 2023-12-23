@@ -12,25 +12,27 @@ public class UserModel
 
     public Dictionary<ResourceKind, int> ResourcesQuantity { get; set; }
 
+    public bool IsSharded { get; set; }
 
-    public UserModel(string pseudo, IClock clock) : this(Guid.NewGuid().ToString(), pseudo, clock.Now)
+    public UserModel(string pseudo, IClock clock, bool isSharded = false) : this(Guid.NewGuid().ToString(), pseudo, clock.Now, isSharded)
     {
     }
 
-    public UserModel(string id, string pseudo, DateTime dateOfCreation)
+    public UserModel(string id, string pseudo, DateTime dateOfCreation, bool isSharded = false)
     {
         Id = id;
         Pseudo = pseudo;
         DateOfCreation = dateOfCreation;
+        IsSharded = isSharded;
         ResourcesQuantity = new Dictionary<ResourceKind, int>
         {
             { ResourceKind.Aluminium, 0 },
-            { ResourceKind.Carbon, 20 },
+            { ResourceKind.Carbon, isSharded ? 0 : 20 },
             { ResourceKind.Gold, 0 },
-            { ResourceKind.Iron, 10 },
-            { ResourceKind.Oxygen, 50 },
+            { ResourceKind.Iron, isSharded ? 0 : 10 },
+            { ResourceKind.Oxygen, isSharded ? 0 : 50 },
             { ResourceKind.Titanium, 0 },
-            { ResourceKind.Water, 50 },
+            { ResourceKind.Water, isSharded ? 0 : 50 },
         };
     }
 
@@ -51,27 +53,27 @@ public class UserModel
     {
         return HashCode.Combine(Id, Pseudo, DateOfCreation, ResourcesQuantity);
     }
-    
+
     public bool HasEnoughResources(Dictionary<ResourceKind, int> resources)
     {
         return resources.All(
             resource => resource.Value <= ResourcesQuantity[resource.Key]
         );
     }
-    
+
     public void ConsumeResources(Dictionary<ResourceKind, int> resources)
     {
-        foreach (KeyValuePair<ResourceKind, int> resource in resources)
+        foreach (var resource in resources)
         {
             ResourcesQuantity[resource.Key] -= resource.Value;
         }
     }
-    
+
     public bool TrySubtractResources(Dictionary<ResourceKind, int> resources)
     {
         foreach (var resource in resources)
         {
-            int newQuantity = ResourcesQuantity[resource.Key] - resource.Value;
+            var newQuantity = ResourcesQuantity[resource.Key] - resource.Value;
 
             if (resource.Value > 0 && newQuantity < 0)
             {
@@ -83,5 +85,4 @@ public class UserModel
 
         return true;
     }
-
 }

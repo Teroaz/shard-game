@@ -1,4 +1,3 @@
-using Shard.Web.ImplementationAPI.Enums;
 using Shard.Web.ImplementationAPI.Models;
 using Shard.Web.ImplementationAPI.Systems;
 using Shard.Web.ImplementationAPI.Units;
@@ -43,8 +42,9 @@ public class UsersService : IUsersService
 
     public void CreateUser(UserModel userModel)
     {
-        var user = _usersRepository.GetUserById(userModel.Id);
-        if (user != null) throw new Exception("User already exist");
+        _usersRepository.AddUser(userModel);
+
+        if (userModel.IsSharded) return;
 
         var randomSystem = _systemsService.GetRandomSystem();
         if (randomSystem == null) throw new Exception("No system found");
@@ -52,7 +52,6 @@ public class UsersService : IUsersService
         var scoutUnit = new ScoutUnitModel(userModel, randomSystem, null);
         var builderUnit = new BuilderUnitModel(userModel, randomSystem, null);
 
-        _usersRepository.AddUser(userModel);
         _unitsRepository.AddUnit(userModel, scoutUnit);
         _unitsRepository.AddUnit(userModel, builderUnit);
     }

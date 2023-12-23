@@ -26,7 +26,7 @@ public class UsersController : ControllerBase
         var user = _userService.GetUserById(id);
         return user == null ? NotFound() : Ok(new UserDto(user));
     }
-    
+
     [Authorize]
     [AllowAnonymous]
     [HttpPut("{id}")]
@@ -40,7 +40,16 @@ public class UsersController : ControllerBase
 
         if (user == null)
         {
-            user = new UserModel(userBody.Id, userBody.Pseudo, _clock.Now);
+            var isUserShard = HttpContext.User.IsInRole(Roles.Shard);
+            if (isUserShard)
+            {
+                user = new UserModel(userBody.Id, userBody.Pseudo, userBody.DateOfCreation, true);
+            }
+            else
+            {
+                user = new UserModel(userBody.Id, userBody.Pseudo, _clock.Now);
+            }
+
             _userService.CreateUser(user);
         }
         else
@@ -51,12 +60,11 @@ public class UsersController : ControllerBase
             {
                 user.ResourcesQuantity = userBody.ResourcesQuantity;
             }
-            
+
             _userService.UpdateUser(id, user);
         }
-        
-        
 
-        return Ok(new UserDto(user));
+
+        return new UserDto(user);
     }
 }

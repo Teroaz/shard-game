@@ -8,6 +8,7 @@ using Shard.Web.ImplementationAPI.Units;
 using Shard.Web.ImplementationAPI.Units.Fighting;
 using Shard.Web.ImplementationAPI.Users;
 using Shard.Web.ImplementationAPI.Utils;
+using Shard.Web.ImplementationAPI.Wormholes;
 using SystemClock = Shard.Shared.Core.SystemClock;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -41,6 +42,22 @@ builder.Services.AddSingleton<MapGenerator>();
 
 builder.Services.AddHostedService<UnitsArenaHostedService>();
 
+builder.Services.Configure<WormholeOptions>(
+    options => options.shards = configuration.GetSection("Wormholes").GetChildren().ToDictionary(
+        Section => Section.Key,
+        Section => new WormholeData(
+            Section.GetValue<string>("baseUri"),
+            Section.GetValue<string>("system"),
+            Section.GetValue<string>("user"),
+            Section.GetValue<string>("sharedPassword")
+        )
+    )
+);
+builder.Services.AddHttpClient<IWormholesService, WormholesService>();
+builder.Services.AddSingleton<IWormholesService, WormholesService>();
+
+
+
 
 var app = builder.Build();
 
@@ -54,7 +71,6 @@ app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
 app.UseEndpoints(endpoints => { endpoints.MapControllers(); });
-
 
 app.Run();
 

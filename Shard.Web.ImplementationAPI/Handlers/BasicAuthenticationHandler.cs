@@ -2,6 +2,7 @@ using System.Net.Http.Headers;
 using System.Security.Claims;
 using System.Text;
 using System.Text.Encodings.Web;
+using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.Extensions.Options;
 using Microsoft.Net.Http.Headers;
@@ -19,51 +20,60 @@ public class BasicAuthenticationHandler : AuthenticationHandler<AuthenticationSc
 
     protected override Task<AuthenticateResult> HandleAuthenticateAsync()
     {
+        Claim[]? claims;
+        ClaimsIdentity? identity;
+        ClaimsPrincipal? principal;
+        AuthenticationTicket? ticket;
+
         if (!Request.Headers.ContainsKey(HeaderNames.Authorization))
         {
-            var claims = new[] { new Claim(ClaimTypes.Name, Roles.Anonymous) };
-            var identity = new ClaimsIdentity(claims, Scheme.Name);
-            var principal = new ClaimsPrincipal(identity);
-            var ticket = new AuthenticationTicket(principal, Scheme.Name);
+            claims = new[] { new Claim(ClaimTypes.Name, Roles.Anonymous) };
+            identity = new ClaimsIdentity(claims, Scheme.Name);
+            principal = new ClaimsPrincipal(identity);
+            ticket = new AuthenticationTicket(principal, Scheme.Name);
             return Task.FromResult(AuthenticateResult.Success(ticket));
+        }
+
+        var authHeader = AuthenticationHeaderValue.Parse(Request.Headers["Authorization"]);
+        var credentialBytes = Convert.FromBase64String(authHeader.Parameter!);
+        var authorizationContent = Encoding.UTF8.GetString(credentialBytes);
+
+        if (string.IsNullOrEmpty(authorizationContent)) return Task.FromResult(AuthenticateResult.Fail("Invalid Authorization Header"));
+
+        // Getting the admin authorization
+        if (authorizationContent == "admin:password")
+        {
+            var user = new UserModel("admin", "password", DateTime.Now);
+            claims = new[]
+            {
+                new Claim(ClaimTypes.Name, user.Pseudo),
+                new Claim(ClaimTypes.Role, Roles.Admin)
+            };
         }
         else
         {
-            UserModel? user = null;
-
-            try
+            // Try to get the shard authorization
+            var shardAuthorization = authorizationContent.Split(':');
+            if (shardAuthorization.Length == 2 && shardAuthorization[0].StartsWith("shard-"))
             {
-                var authHeader = AuthenticationHeaderValue.Parse(Request.Headers["Authorization"]);
-                var credentialBytes = Convert.FromBase64String(authHeader.Parameter!);
-                var credentials = Encoding.UTF8.GetString(credentialBytes).Split(':');
-                var pseudo = credentials[0];
-                var password = credentials[1];
+                var shardName = shardAuthorization[0][6..];
+                // var shardSharedPassword = shardAuthorization[1];
 
-                user = ValidateCredentials(pseudo, password);
+                claims = new[]
+                {
+                    new Claim(ClaimTypes.Name, shardName),
+                    new Claim(ClaimTypes.Role, Roles.Shard)
+                };
             }
-            catch
+            else
             {
-                return Task.FromResult(AuthenticateResult.Fail("Invalid Authorization Header"));
+                claims = new[] { new Claim(ClaimTypes.Name, Roles.User) };
             }
-
-            if (user == null)
-                return Task.FromResult(AuthenticateResult.Fail("Invalid Username or Password"));
-
-            var claims = new[]
-            {
-                new Claim(ClaimTypes.NameIdentifier, user.Pseudo),
-                new Claim(ClaimTypes.Role, Roles.Admin)
-            };
-            var identity = new ClaimsIdentity(claims, Scheme.Name);
-            var principal = new ClaimsPrincipal(identity);
-            var ticket = new AuthenticationTicket(principal, Scheme.Name);
-
-            return Task.FromResult(AuthenticateResult.Success(ticket));
         }
-    }
 
-    private UserModel? ValidateCredentials(string pseudo, string password)
-    {
-        return pseudo == "admin" && password == "password" ? new UserModel(pseudo, password, DateTime.Now) : null;
+        identity = new ClaimsIdentity(claims, Scheme.Name);
+        principal = new ClaimsPrincipal(identity);
+        ticket = new AuthenticationTicket(principal, Scheme.Name);
+        return Task.FromResult(AuthenticateResult.Success(ticket));
     }
 }

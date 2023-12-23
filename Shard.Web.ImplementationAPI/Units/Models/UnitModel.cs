@@ -10,9 +10,11 @@ public abstract class UnitModel
     public UserModel User { get; set; }
     public abstract UnitType Type { get; }
 
-    public SystemModel System { get; set; }
+    public SystemModel? System { get; set; }
 
     public PlanetModel? Planet { get; set; }
+
+    public string? DestinationShard { get; set; }
 
     public SystemModel? DestinationSystem { get; set; }
 
@@ -49,7 +51,7 @@ public abstract class UnitModel
             timeToMove = timeToMove.Add(UnitTravelTime.TimeToEnterPlanet);
         }
 
-        if (System.Name != destinationSystem.Name)
+        if (System?.Name != destinationSystem.Name)
         {
             timeToMove = timeToMove.Add(UnitTravelTime.TimeToChangeSystem);
         }
