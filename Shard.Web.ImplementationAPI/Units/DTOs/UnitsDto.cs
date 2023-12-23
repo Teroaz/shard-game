@@ -40,5 +40,10 @@ public class UnitsDto
         {
             Health = fightingUnitModel.Health;
         }
+
+        if (unitModel is CargoUnitModel cargo)
+        {
+            ResourcesQuantity = cargo.ResourcesQuantity;
+        }
     }
 }

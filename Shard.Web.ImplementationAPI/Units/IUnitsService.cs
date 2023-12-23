@@ -1,3 +1,4 @@
+using Shard.Shared.Core;
 using Shard.Web.ImplementationAPI.Models;
 using Shard.Web.ImplementationAPI.Systems.Models;
 using Shard.Web.ImplementationAPI.Units.DTOs;
@@ -20,9 +21,9 @@ public interface IUnitsService
 
     void UpdateUnit(UserModel user, UnitModel unit);
 
-    UnitModel ConstructSpecificUnit(UnitType unitType, UserModel user, string unitId, SystemModel system, PlanetModel? planet);
+    UnitModel ConstructSpecificUnit(UnitType unitType, UserModel user, string unitId, SystemModel system, PlanetModel? planet, Dictionary<ResourceKind, int>? resourcesQuantity = null);
 
-    UnitModel ConstructSpecificUnit(UnitType unitType, UserModel user, SystemModel system, PlanetModel? planet);
+    UnitModel ConstructSpecificUnit(UnitType unitType, UserModel user, SystemModel system, PlanetModel? planet, Dictionary<ResourceKind, int>? resourcesQuantity = null);
 
     public List<FightingUnitModel> GetFightingUnits();
 }

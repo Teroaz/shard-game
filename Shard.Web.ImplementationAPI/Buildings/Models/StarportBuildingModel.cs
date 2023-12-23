@@ -62,6 +62,15 @@ public class StarportBuildingModel : BuildingModel
                     { ResourceKind.Iron, 60 },
                     { ResourceKind.Gold, 20 }
                 }
+            },
+            {
+                UnitType.Cargo,
+                new Dictionary<ResourceKind, int>
+                {
+                    { ResourceKind.Carbon, 10 },
+                    { ResourceKind.Iron, 10 },
+                    { ResourceKind.Gold, 5 }
+                }
             }
         };
 

@@ -22,4 +22,11 @@ public static class UnitFightingDetails
         public const int AttackDamage = 40;
         public const int AttackPeriod = 6;
     }
+    
+    public static class Cargo
+    {
+        public const int InitialHealth = 100;
+        public const int AttackDamage = 0;
+        public const int AttackPeriod = 1000;
+    }
 }

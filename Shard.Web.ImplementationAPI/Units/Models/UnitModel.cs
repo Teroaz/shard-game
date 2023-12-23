@@ -21,6 +21,8 @@ public abstract class UnitModel
     public DateTime EstimatedArrivalTime { get; set; }
 
     public Task? MoveTask { get; private set; }
+    
+    public Dictionary<ResourceKind, int>? ResourcesQuantity { get; set; }
 
     protected UnitModel(UserModel user, SystemModel system, PlanetModel? planet)
         : this(Guid.NewGuid().ToString(), user, system, planet)

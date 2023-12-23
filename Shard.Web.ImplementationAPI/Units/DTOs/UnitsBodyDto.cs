@@ -1,3 +1,5 @@
+using Shard.Shared.Core;
+
 namespace Shard.Web.ImplementationAPI.Units.DTOs;
 
 public class UnitsBodyDto
@@ -13,4 +15,5 @@ public class UnitsBodyDto
     public string? DestinationSystem { get; init; }
 
     public string? DestinationPlanet { get; init; }
+    public Dictionary<ResourceKind, int>? ResourcesQuantity { get; init; }
 }

@@ -1,3 +1,5 @@
+using Shard.Shared.Core;
+using Shard.Shared.Web.IntegrationTests.TestEntities;
 using Shard.Web.ImplementationAPI.Models;
 using Shard.Web.ImplementationAPI.Systems.Models;
 using Shard.Web.ImplementationAPI.Units.DTOs;
@@ -58,7 +60,7 @@ public class UnitsService : IUnitsService
         return _unitsRepository.GetUnitsByUser(user);
     }
 
-    public UnitModel ConstructSpecificUnit(UnitType unitType, UserModel user, string unitId, SystemModel system, PlanetModel? planet)
+    public UnitModel ConstructSpecificUnit(UnitType unitType, UserModel user, string unitId, SystemModel system, PlanetModel? planet, Dictionary<ResourceKind, int>? resourcesQuantity)
     {
         return unitType switch
         {
@@ -67,17 +69,19 @@ public class UnitsService : IUnitsService
             UnitType.Bomber => new BomberUnitModel(unitId, user, system, planet),
             UnitType.Cruiser => new CruiserUnitModel(unitId, user, system, planet),
             UnitType.Fighter => new FighterUnitModel(unitId, user, system, planet),
+            UnitType.Cargo => new CargoUnitModel(unitId, user, system, planet, resourcesQuantity),
             _ => throw new ArgumentOutOfRangeException()
         };
     }
 
-    public UnitModel ConstructSpecificUnit(UnitType unitType, UserModel user, SystemModel system, PlanetModel? planet)
+    public UnitModel ConstructSpecificUnit(UnitType unitType, UserModel user, SystemModel system, PlanetModel? planet, Dictionary<ResourceKind, int>? resourcesQuantity)
     {
-        return ConstructSpecificUnit(unitType, user, Guid.NewGuid().ToString(), system, planet);
+        return ConstructSpecificUnit(unitType, user, Guid.NewGuid().ToString(), system, planet, resourcesQuantity);
     }
 
     public List<FightingUnitModel> GetFightingUnits()
     {
         return _unitsRepository.GetFightingUnits();
     }
+    
 }

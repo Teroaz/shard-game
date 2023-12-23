@@ -6,7 +6,6 @@ using Shard.Web.ImplementationAPI.Enums;
 using Shard.Web.ImplementationAPI.Systems;
 using Shard.Web.ImplementationAPI.Units.DTOs;
 using Shard.Web.ImplementationAPI.Units.Fighting.Models;
-using Shard.Web.ImplementationAPI.Units.Models;
 using Shard.Web.ImplementationAPI.Users;
 using Shard.Web.ImplementationAPI.Utils;
 
@@ -110,6 +109,7 @@ public class UnitsController : ControllerBase
         var basePlanet = baseSystem.Planets.FirstOrDefault(planet => planet.Name == unitsBodyDto.Planet);
 
         var unitType = unitsBodyDto.Type.ToEnum<UnitType>();
+        var resourcesQuantity = unitsBodyDto.ResourcesQuantity;
 
         var oldUnit = _unitsService.GetUnitByIdAndUser(user, unitId);
 
@@ -117,7 +117,7 @@ public class UnitsController : ControllerBase
         {
             if (HttpContext.User.IsInRole(Roles.Admin))
             {
-                var newUnit = _unitsService.ConstructSpecificUnit(unitType, user, unitId, baseSystem, basePlanet);
+                var newUnit = _unitsService.ConstructSpecificUnit(unitType, user, unitId, baseSystem, basePlanet, resourcesQuantity);
                 _unitsService.AddUnit(user, newUnit);
                 return new UnitsDto(newUnit);
             }
@@ -133,8 +133,40 @@ public class UnitsController : ControllerBase
 
         oldUnit.DestinationSystem = destinationSystem;
         oldUnit.DestinationPlanet = destinationPlanet;
-
+        
         _unitsService.UpdateUnit(user, oldUnit);
+
+        if (resourcesQuantity != null && unitType == UnitType.Cargo)
+        {
+            var starport = _buildingsService.GetBuildingsByUser(user)
+                .Find(building =>
+                    building.Planet.Name == unitsBodyDto.Planet && building.Type == BuildingType.Starport);
+
+            if (starport == null)
+            {
+                return BadRequest("No starport on this planet");
+            }
+
+            Dictionary<ResourceKind, int> resources = (oldUnit as CargoUnitModel)
+                .LoadUnloadResources(unitsBodyDto.ResourcesQuantity);
+
+            foreach(var resource in resources)
+            {
+                if(resource.Value > 0) // load
+                {
+                    if(user.ResourcesQuantity[resource.Key] - resource.Value > 0)
+                    {
+                        user.ResourcesQuantity[resource.Key] = user.ResourcesQuantity[resource.Key] - resource.Value;
+                    }
+                }
+                else // unload
+                {
+                    user.ResourcesQuantity[resource.Key] += -resource.Value; // - to convert to positive int
+                }
+            }
+            
+            oldUnit.ResourcesQuantity = resourcesQuantity;
+        }
 
         if (unitsBodyDto.DestinationSystem != unitsBodyDto.System ||
             unitsBodyDto.DestinationPlanet != unitsBodyDto.Planet)

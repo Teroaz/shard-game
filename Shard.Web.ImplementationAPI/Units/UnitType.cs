@@ -6,5 +6,6 @@ public enum UnitType
     Builder,
     Fighter,
     Bomber,
-    Cruiser
+    Cruiser,
+    Cargo
 }

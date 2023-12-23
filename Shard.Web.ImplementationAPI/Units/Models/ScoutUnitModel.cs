@@ -5,6 +5,7 @@ namespace Shard.Web.ImplementationAPI.Units.Models;
 
 public class ScoutUnitModel : UnitModel
 {
+    
     public override UnitType Type => UnitType.Scout;
 
     public ScoutUnitModel(UserModel user, SystemModel system, PlanetModel? planet)
