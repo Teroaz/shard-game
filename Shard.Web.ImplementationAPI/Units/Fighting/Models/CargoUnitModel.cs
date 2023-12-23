@@ -6,9 +6,6 @@ namespace Shard.Web.ImplementationAPI.Units.Fighting.Models;
 
 public class CargoUnitModel : FightingUnitModel
 {
-    
-    public Dictionary<ResourceKind, int> ResourcesQuantity { get; set; }
-    
     protected override int AttackDamage => UnitFightingDetails.Cargo.AttackDamage;
     public override int AttackPeriod => UnitFightingDetails.Cargo.AttackPeriod;
     public override UnitType Type => UnitType.Cargo;
@@ -37,27 +34,17 @@ public class CargoUnitModel : FightingUnitModel
     
     public Dictionary<ResourceKind, int> LoadUnloadResources(Dictionary<ResourceKind, int> newResources)
     {
-        Dictionary<ResourceKind, int> resourcesToLoadUnload = new Dictionary<ResourceKind, int>();
+        var resourcesToLoadUnload = new Dictionary<ResourceKind, int>();
+
         foreach (var resource in newResources)
         {
-            try
-            {
-                if (ResourcesQuantity[resource.Key] > 0)
-                {
-                    int difference = resource.Value - ResourcesQuantity[resource.Key];
-                    resourcesToLoadUnload[resource.Key] = difference;
-                }
-                else
-                {
-                    resourcesToLoadUnload[resource.Key] = resource.Value;
-                }
-            }
-            catch (KeyNotFoundException)
-            {
-                resourcesToLoadUnload[resource.Key] = resource.Value;
-            }
+            int currentQuantity = ResourcesQuantity.TryGetValue(resource.Key, out int quantity) ? quantity : 0;
+            int difference = resource.Value - currentQuantity;
+            resourcesToLoadUnload[resource.Key] = difference;
         }
+
         return resourcesToLoadUnload;
     }
+
 
 }

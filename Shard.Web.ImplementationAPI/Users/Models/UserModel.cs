@@ -66,4 +66,22 @@ public class UserModel
             ResourcesQuantity[resource.Key] -= resource.Value;
         }
     }
+    
+    public bool TrySubtractResources(Dictionary<ResourceKind, int> resources)
+    {
+        foreach (var resource in resources)
+        {
+            int newQuantity = ResourcesQuantity[resource.Key] - resource.Value;
+
+            if (resource.Value > 0 && newQuantity < 0)
+            {
+                return false;
+            }
+
+            ResourcesQuantity[resource.Key] = newQuantity;
+        }
+
+        return true;
+    }
+
 }

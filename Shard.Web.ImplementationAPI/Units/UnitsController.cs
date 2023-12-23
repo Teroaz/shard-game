@@ -136,8 +136,13 @@ public class UnitsController : ControllerBase
         
         _unitsService.UpdateUnit(user, oldUnit);
 
-        if (resourcesQuantity != null && unitType == UnitType.Cargo)
+        if (resourcesQuantity != null)
         {
+            if (unitType != UnitType.Cargo)
+            {
+                return BadRequest();
+            }
+            
             var starport = _buildingsService.GetBuildingsByUser(user)
                 .Find(building =>
                     building.Planet.Name == unitsBodyDto.Planet && building.Type == BuildingType.Starport);
@@ -150,20 +155,9 @@ public class UnitsController : ControllerBase
             Dictionary<ResourceKind, int> resources = (oldUnit as CargoUnitModel)
                 .LoadUnloadResources(unitsBodyDto.ResourcesQuantity);
 
-            foreach(var resource in resources)
-            {
-                if(resource.Value > 0) // load
-                {
-                    if(user.ResourcesQuantity[resource.Key] - resource.Value > 0)
-                    {
-                        user.ResourcesQuantity[resource.Key] = user.ResourcesQuantity[resource.Key] - resource.Value;
-                    }
-                }
-                else // unload
-                {
-                    user.ResourcesQuantity[resource.Key] += -resource.Value; // - to convert to positive int
-                }
-            }
+            var isSuccess = user.TrySubtractResources(resources);
+            
+            if(!isSuccess) return BadRequest("Not enough resources");
             
             oldUnit.ResourcesQuantity = resourcesQuantity;
         }
