@@ -46,5 +46,11 @@ public class CargoUnitModel : FightingUnitModel
         return resourcesToLoadUnload;
     }
 
+    public bool CompareResources(Dictionary<ResourceKind, int> resources)
+    {
+        return ResourcesQuantity.Count == resources.Count && 
+               ResourcesQuantity.All(kv => resources.TryGetValue(kv.Key, out int value) && value == kv.Value);
+    }
+
 
 }

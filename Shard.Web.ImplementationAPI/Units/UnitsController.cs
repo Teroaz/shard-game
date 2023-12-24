@@ -169,7 +169,7 @@ public class UnitsController : ControllerBase
                 .Find(building =>
                     building.Planet.Name == unitsBodyDto.Planet && building.Type == BuildingType.Starport);
 
-            if (starport == null)
+            if (starport == null && !cargoUnitModel.CompareResources(resourcesQuantity))
             {
                 return BadRequest("No starport on this planet");
             }
