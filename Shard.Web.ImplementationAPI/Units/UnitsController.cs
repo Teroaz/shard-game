@@ -97,6 +97,7 @@ public class UnitsController : ControllerBase
     }
 
     [Authorize]
+    [AllowAnonymous]
     [HttpPut("{unitId}")]
     public async Task<ActionResult<UnitsDto>> Put(string userId, string unitId, [FromBody] UnitsBodyDto unitsBodyDto)
     {
@@ -130,15 +131,11 @@ public class UnitsController : ControllerBase
 
                 _unitsService.AddUnit(user, newUnit);
             }
-            else if (HttpContext.User.IsInRole(Roles.User))
+            else
             {
                 return Unauthorized();
             }
-            else
-            {
-                return Forbid("You are not allowed to create units");
-            }
-
+            
             return new UnitsDto(newUnit);
         }
 
@@ -146,8 +143,6 @@ public class UnitsController : ControllerBase
 
         if (destinationShard != null)
         {
-            if (!HttpContext.User.IsInRole(Roles.User) && !HttpContext.User.IsInRole(Roles.Admin)) return Forbid("You are not allowed to jump shards");
-            
             var unitUri = await _wormholesService.Jump(user, oldUnit, destinationShard);
             _unitsService.RemoveUnit(user, oldUnit);
             return RedirectPermanentPreserveMethod(unitUri);
@@ -201,7 +196,6 @@ public class UnitsController : ControllerBase
         }
 
         oldUnit.Move(_clock, destinationSystem, destinationPlanet);
-
         return new UnitsDto(oldUnit);
     }
 }

@@ -24,7 +24,6 @@ public class BasicAuthenticationHandler : AuthenticationHandler<AuthenticationSc
         ClaimsIdentity? identity;
         ClaimsPrincipal? principal;
         AuthenticationTicket? ticket;
-
         if (!Request.Headers.ContainsKey(HeaderNames.Authorization))
         {
             claims = new[] { new Claim(ClaimTypes.Name, Roles.Anonymous) };
