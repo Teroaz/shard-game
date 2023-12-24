@@ -7,6 +7,8 @@ public class UnitsBodyDto
     public string Id { get; init; }
 
     public string Type { get; init; }
+    
+    public int? Health { get; set; }
 
     public string? System { get; init; }
 

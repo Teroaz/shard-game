@@ -118,7 +118,11 @@ public class UnitsController : ControllerBase
 
         var oldUnit = _unitsService.GetUnitByIdAndUser(user, unitId);
         var newUnit = _unitsService.ConstructSpecificUnit(unitType, user, unitId, baseSystem, basePlanet, resourcesQuantity);
-
+        if (newUnit is FightingUnitModel fightingUnitModel && unitsBodyDto.Health != null)
+        {
+            fightingUnitModel.Health = unitsBodyDto.Health.Value;
+        }
+        
         if (oldUnit == null)
         {
             if (HttpContext.User.IsInRole(Roles.Admin) || HttpContext.User.IsInRole(Roles.Shard))
