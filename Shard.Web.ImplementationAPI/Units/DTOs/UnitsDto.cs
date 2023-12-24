@@ -1,3 +1,4 @@
+using System.Text.Json.Serialization;
 using Shard.Shared.Core;
 using Shard.Web.ImplementationAPI.Units.Fighting.Models;
 using Shard.Web.ImplementationAPI.Units.Models;
@@ -22,9 +23,8 @@ public class UnitsDto
     public string? DestinationPlanet { get; init; }
 
     public string? EstimatedArrivalTime { get; init; }
-
-    public Dictionary<ResourceKind, int>? ResourcesQuantity { get; set; }
-
+    
+    public Dictionary<string, int>? ResourcesQuantity { get; set; }
     public int? Health { get; set; }
 
     public UnitsDto(UnitModel unitModel)
@@ -37,7 +37,7 @@ public class UnitsDto
         DestinationPlanet = unitModel.DestinationPlanet?.Name;
         DestinationShard = unitModel.DestinationShard;
         EstimatedArrivalTime = unitModel.EstimatedArrivalTime.ToString("yyyy-MM-ddTHH:mm:ss");
-        ResourcesQuantity = unitModel.Planet?.ResourceQuantity;
+        ResourcesQuantity = unitModel.Planet?.ResourceQuantity.ToDictionary(Resource => Resource.Key.ToString().ToLower(), Resource => Resource.Value);
 
         if (unitModel is FightingUnitModel fightingUnitModel)
         {
@@ -46,7 +46,8 @@ public class UnitsDto
 
         if (unitModel is CargoUnitModel cargo)
         {
-            ResourcesQuantity = cargo.ResourcesQuantity;
+            ResourcesQuantity = cargo.ResourcesQuantity.ToDictionary(Resource => Resource.Key.ToString().ToLower(), Resource => Resource.Value);
         }
+        
     }
 }

@@ -114,7 +114,7 @@ public class UnitsController : ControllerBase
         var basePlanet = baseSystem?.Planets.FirstOrDefault(planet => planet.Name == unitsBodyDto.Planet);
 
         var unitType = unitsBodyDto.Type.ToEnum<UnitType>();
-        var resourcesQuantity = unitsBodyDto.ResourcesQuantity;
+        Dictionary<ResourceKind, int> resourcesQuantity = unitsBodyDto.ResourcesQuantity;
 
         var oldUnit = _unitsService.GetUnitByIdAndUser(user, unitId);
         var newUnit = _unitsService.ConstructSpecificUnit(unitType, user, unitId, baseSystem, basePlanet, resourcesQuantity);
