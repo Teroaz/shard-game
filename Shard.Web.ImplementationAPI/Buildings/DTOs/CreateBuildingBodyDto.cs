@@ -2,10 +2,10 @@
 
 public class CreateBuildingBodyDto
 {
-    public string Id { get; set; }
-    public string? Type { get; set; }
-    public string? BuilderId { get; set; }
-    public string? ResourceCategory { get; set; }
+    public string Id { get; }
+    public string? Type { get; }
+    public string? BuilderId { get; }
+    public string? ResourceCategory { get; }
 
     public CreateBuildingBodyDto(string? id, string type, string builderId, string? resourceCategory)
     {

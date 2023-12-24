@@ -1,15 +1,15 @@
 ﻿using Shard.Shared.Core;
-using Shard.Web.ImplementationAPI.Models;
 using Shard.Web.ImplementationAPI.Systems.Models;
 using Shard.Web.ImplementationAPI.Units;
+using Shard.Web.ImplementationAPI.Users.Models;
 
 namespace Shard.Web.ImplementationAPI.Buildings.Models;
 
 public class StarportBuildingModel : BuildingModel
 {
     public override BuildingType Type => BuildingType.Starport;
-    
-    public List<UnitType>? Queue { get; set; } = new();
+
+    private List<UnitType>? Queue { get; } = new();
 
     public StarportBuildingModel(string id, UserModel user, SystemModel system, PlanetModel planet) : base(id, user, system, planet)
     {

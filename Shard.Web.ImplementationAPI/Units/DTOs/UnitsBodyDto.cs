@@ -4,9 +4,9 @@ namespace Shard.Web.ImplementationAPI.Units.DTOs;
 
 public class UnitsBodyDto
 {
-    public string Id { get; init; }
+    public required string Id { get; init; }
 
-    public string Type { get; init; }
+    public required string Type { get; init; }
     
     public int? Health { get; set; }
 
@@ -15,8 +15,10 @@ public class UnitsBodyDto
     public string? Planet { get; init; }
 
     public string? DestinationShard { get; set; }
+
     public string? DestinationSystem { get; init; }
 
     public string? DestinationPlanet { get; init; }
+    
     public Dictionary<ResourceKind, int>? ResourcesQuantity { get; init; }
 }

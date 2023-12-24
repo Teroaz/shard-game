@@ -43,21 +43,18 @@ builder.Services.AddSingleton<MapGenerator>();
 builder.Services.AddHostedService<UnitsArenaHostedService>();
 
 builder.Services.Configure<WormholeOptions>(
-    options => options.shards = configuration.GetSection("Wormholes").GetChildren().ToDictionary(
-        Section => Section.Key,
-        Section => new WormholeData(
-            Section.GetValue<string>("baseUri"),
-            Section.GetValue<string>("system"),
-            Section.GetValue<string>("user"),
-            Section.GetValue<string>("sharedPassword")
+    options => options.WormholeDatas = configuration.GetSection("Wormholes").GetChildren().Select(
+        section => new WormholeData(
+            section.Key,
+            section.GetValue<string>("baseUri") ?? throw new InvalidOperationException(),
+            section.GetValue<string>("system") ?? throw new InvalidOperationException(),
+            section.GetValue<string>("user") ?? throw new InvalidOperationException(),
+            section.GetValue<string>("sharedPassword") ?? throw new InvalidOperationException()
         )
-    )
+    ).ToList()
 );
 builder.Services.AddHttpClient<IWormholesService, WormholesService>();
 builder.Services.AddSingleton<IWormholesService, WormholesService>();
-
-
-
 
 var app = builder.Build();
 

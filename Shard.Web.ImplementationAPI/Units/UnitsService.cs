@@ -1,10 +1,9 @@
 using Shard.Shared.Core;
-using Shard.Shared.Web.IntegrationTests.TestEntities;
-using Shard.Web.ImplementationAPI.Models;
 using Shard.Web.ImplementationAPI.Systems.Models;
 using Shard.Web.ImplementationAPI.Units.DTOs;
 using Shard.Web.ImplementationAPI.Units.Fighting.Models;
 using Shard.Web.ImplementationAPI.Units.Models;
+using Shard.Web.ImplementationAPI.Users.Models;
 using Shard.Web.ImplementationAPI.Utils;
 
 namespace Shard.Web.ImplementationAPI.Units;
@@ -45,9 +44,7 @@ public class UnitsService : IUnitsService
         if (
             unitsBodyDto == null ||
             id != unitsBodyDto.Id ||
-            string.IsNullOrWhiteSpace(unitsBodyDto.Type) 
-            // ||
-            // string.IsNullOrWhiteSpace(unitsBodyDto.System)
+            string.IsNullOrWhiteSpace(unitsBodyDto.Type)
         )
         {
             return false;

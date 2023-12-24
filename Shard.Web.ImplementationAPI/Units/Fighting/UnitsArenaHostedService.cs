@@ -32,7 +32,7 @@ public class UnitsArenaHostedService : IHostedService, IDisposable
     {
         var fightingUnits = _unitsService.GetFightingUnits();
 
-        while (true)
+        while (CombatTask?.IsCanceled != true)
         {
             foreach (var unit in fightingUnits)
             {
@@ -58,5 +58,7 @@ public class UnitsArenaHostedService : IHostedService, IDisposable
         {
             CombatTask.Dispose();
         }
+        
+        GC.SuppressFinalize(this);
     }
 }

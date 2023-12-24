@@ -1,5 +1,5 @@
-﻿using Shard.Web.ImplementationAPI.Models;
-using Shard.Web.ImplementationAPI.Systems.Models;
+﻿using Shard.Web.ImplementationAPI.Systems.Models;
+using Shard.Web.ImplementationAPI.Users.Models;
 
 namespace Shard.Web.ImplementationAPI.Units.Models;
 
@@ -9,7 +9,7 @@ public class ScoutUnitModel : UnitModel
     public override UnitType Type => UnitType.Scout;
 
     public ScoutUnitModel(UserModel user, SystemModel system, PlanetModel? planet)
-        : this(Guid.NewGuid().ToString(), user, system, planet)
+        : base(user, system, planet)
     {
     }
 

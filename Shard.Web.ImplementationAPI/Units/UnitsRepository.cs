@@ -1,6 +1,6 @@
-using Shard.Web.ImplementationAPI.Models;
 using Shard.Web.ImplementationAPI.Units.Fighting.Models;
 using Shard.Web.ImplementationAPI.Units.Models;
+using Shard.Web.ImplementationAPI.Users.Models;
 
 namespace Shard.Web.ImplementationAPI.Units;
 

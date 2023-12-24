@@ -1,10 +1,10 @@
 using Shard.Shared.Core;
 
-namespace Shard.Web.ImplementationAPI.Models;
+namespace Shard.Web.ImplementationAPI.Users.Models;
 
 public class UserModel
 {
-    public string Id { get; set; }
+    public string Id { get; }
 
     public string Pseudo { get; set; }
 
@@ -46,7 +46,7 @@ public class UserModel
                    ResourcesQuantity.Equals(user.ResourcesQuantity);
         }
 
-        return base.Equals(obj);
+        return false;
     }
 
     public override int GetHashCode()

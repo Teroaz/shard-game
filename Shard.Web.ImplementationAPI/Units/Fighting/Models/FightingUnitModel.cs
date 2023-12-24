@@ -1,6 +1,6 @@
-﻿using Shard.Web.ImplementationAPI.Models;
-using Shard.Web.ImplementationAPI.Systems.Models;
+﻿using Shard.Web.ImplementationAPI.Systems.Models;
 using Shard.Web.ImplementationAPI.Units.Models;
+using Shard.Web.ImplementationAPI.Users.Models;
 
 namespace Shard.Web.ImplementationAPI.Units.Fighting.Models;
 
@@ -37,7 +37,7 @@ public abstract class FightingUnitModel : UnitModel
         else
         {
             possibleTargets = possibleTargets
-                .Where(u => u.System.Name == System.Name).ToList();
+                .Where(u => u.System?.Name == System?.Name).ToList();
         }
 
         var target = possibleTargets.MinBy(u => priorityTargetTypes.IndexOf(u.Type));

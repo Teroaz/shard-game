@@ -1,11 +1,11 @@
-﻿using Shard.Web.ImplementationAPI.Models;
-using Shard.Web.ImplementationAPI.Units.Models;
+﻿using Shard.Web.ImplementationAPI.Units.Models;
+using Shard.Web.ImplementationAPI.Users.Models;
 
 namespace Shard.Web.ImplementationAPI.Wormholes;
 
 public interface IWormholesService
 {
-    public KeyValuePair<string, WormholeData> GetShardData(string shard);
+    public WormholeData? GetWormholeByShardName(string shard);
 
     public Task<string> Jump(UserModel user, UnitModel unit, string shard);
 }

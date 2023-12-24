@@ -2,5 +2,5 @@
 
 public record WormholeOptions
 {
-    public Dictionary<string, WormholeData> shards { get; set; }
+    public List<WormholeData> WormholeDatas { get; set; } = new();
 }

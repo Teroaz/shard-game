@@ -2,17 +2,17 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Shard.Shared.Core;
 using Shard.Web.ImplementationAPI.Enums;
-using Shard.Web.ImplementationAPI.Models;
 using Shard.Web.ImplementationAPI.Users.Dtos;
+using Shard.Web.ImplementationAPI.Users.Models;
 
 namespace Shard.Web.ImplementationAPI.Users;
 
 [ApiController]
-[Route("[controller]")]
+[Route("[controller]/{id}")]
 public class UsersController : ControllerBase
 {
     private readonly IUsersService _userService;
-    private IClock _clock;
+    private readonly IClock _clock;
 
     public UsersController(IUsersService userService, IClock clock)
     {
@@ -20,16 +20,18 @@ public class UsersController : ControllerBase
         _clock = clock;
     }
 
-    [HttpGet("{id}")]
+    [HttpGet]
     public ActionResult<UserDto> GetUser(string id)
     {
         var user = _userService.GetUserById(id);
-        return user == null ? NotFound() : Ok(new UserDto(user));
+        if (user == null) return NotFound("User not found");
+        
+        return new UserDto(user);
     }
 
     [Authorize]
     [AllowAnonymous]
-    [HttpPut("{id}")]
+    [HttpPut]
     public ActionResult<UserDto> PutUser(string id, [FromBody] UserBodyDto userBody)
     {
         var isAdmin = HttpContext.User.IsInRole(Roles.Admin);

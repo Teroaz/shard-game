@@ -1,26 +1,27 @@
 using Shard.Shared.Core;
-using Shard.Web.ImplementationAPI.Models;
 using Shard.Web.ImplementationAPI.Systems.Models;
+using Shard.Web.ImplementationAPI.Users.Models;
+using Shard.Web.ImplementationAPI.Wormholes;
 
 namespace Shard.Web.ImplementationAPI.Units.Models;
 
 public abstract class UnitModel
 {
-    public string Id { get; set; }
-    public UserModel User { get; set; }
+    public string Id { get; }
+    
+    public UserModel User { get; }
+    
     public abstract UnitType Type { get; }
 
-    public SystemModel? System { get; set; }
+    public SystemModel System { get; set; }
 
     public PlanetModel? Planet { get; set; }
-
-    public string? DestinationShard { get; set; }
-
+    
     public SystemModel? DestinationSystem { get; set; }
 
     public PlanetModel? DestinationPlanet { get; set; }
 
-    public DateTime EstimatedArrivalTime { get; set; }
+    public DateTime EstimatedArrivalTime { get; private set; }
 
     public Task? MoveTask { get; private set; }
     

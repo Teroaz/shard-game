@@ -17,15 +17,10 @@ namespace Shard.Web.ImplementationAPI.Units;
 public class UnitsController : ControllerBase
 {
     private readonly IUnitsService _unitsService;
-
     private readonly IUsersService _userService;
-
     private readonly ISystemsService _systemsService;
-
     private readonly IBuildingsService _buildingsService;
-
     private readonly IWormholesService _wormholesService;
-
     private readonly IClock _clock;
 
     public UnitsController(IUnitsService unitsService, IUsersService userService, ISystemsService systemsService,
@@ -43,7 +38,7 @@ public class UnitsController : ControllerBase
     public ActionResult<List<UnitsDto>> Get(string userId)
     {
         var user = _userService.GetUserById(userId);
-        if (user == null) return NotFound();
+        if (user == null) return NotFound("User not found");
 
         var units = _unitsService.GetUnitsByUser(user);
         var unitsDtos = units.Select(unit => new UnitsDto(unit)).ToList();
@@ -55,15 +50,14 @@ public class UnitsController : ControllerBase
     public async Task<ActionResult<UnitsDto>> Get(string userId, string unitId)
     {
         var user = _userService.GetUserById(userId);
-        if (user == null) return NotFound();
+        if (user == null) return NotFound("User not found");
 
         var unit = _unitsService.GetUnitByIdAndUser(user, unitId);
-        if (unit == null) return NotFound();
+        if (unit == null) return NotFound("Unit not found");
 
-        var now = _clock.Now;
         var arrival = unit.EstimatedArrivalTime;
 
-        var timeLeft = arrival - now;
+        var timeLeft = arrival - _clock.Now;
 
         if (timeLeft.TotalSeconds > 2)
         {
@@ -88,10 +82,10 @@ public class UnitsController : ControllerBase
     public ActionResult<UnitsLocationDto> GetLocation(string unitId, string userId)
     {
         var user = _userService.GetUserById(userId);
-        if (user == null) return NotFound();
+        if (user == null) return NotFound("User not found");
 
         var unit = _unitsService.GetUnitByIdAndUser(user, unitId);
-        if (unit == null) return NotFound();
+        if (unit == null) return NotFound("Unit not found");
 
         return new UnitsLocationDto(unit);
     }
@@ -102,49 +96,48 @@ public class UnitsController : ControllerBase
     public async Task<ActionResult<UnitsDto>> Put(string userId, string unitId, [FromBody] UnitsBodyDto unitsBodyDto)
     {
         var user = _userService.GetUserById(userId);
-        if (user == null) return NotFound();
+        if (user == null) return NotFound("User not found");
 
         var isValid = _unitsService.IsBodyValid(unitId, unitsBodyDto);
         if (!isValid) return BadRequest("Invalid body");
 
         if (!unitsBodyDto.Type.IsValidEnumValue<UnitType>()) return BadRequest("Invalid unit type");
-
-        var baseSystem = _systemsService.GetSystem(unitsBodyDto.System);
-        // if (baseSystem == null) return NotFound();
-        var basePlanet = baseSystem?.Planets.FirstOrDefault(planet => planet.Name == unitsBodyDto.Planet);
-
         var unitType = unitsBodyDto.Type.ToEnum<UnitType>();
-        Dictionary<ResourceKind, int> resourcesQuantity = unitsBodyDto.ResourcesQuantity;
 
         var oldUnit = _unitsService.GetUnitByIdAndUser(user, unitId);
+
+        var baseSystem = unitsBodyDto.System != null ? _systemsService.GetSystem(unitsBodyDto.System) : null;
+        var basePlanet = baseSystem?.Planets.FirstOrDefault(planet => planet.Name == unitsBodyDto.Planet);
+        
+        var resourcesQuantity = unitsBodyDto.ResourcesQuantity;
+
         var newUnit = _unitsService.ConstructSpecificUnit(unitType, user, unitId, baseSystem, basePlanet, resourcesQuantity);
         if (newUnit is FightingUnitModel fightingUnitModel && unitsBodyDto.Health != null)
         {
             fightingUnitModel.Health = unitsBodyDto.Health.Value;
         }
-        
+
         if (oldUnit == null)
         {
-            if (HttpContext.User.IsInRole(Roles.Admin) || HttpContext.User.IsInRole(Roles.Shard))
-            {
-                if (HttpContext.User.IsInRole(Roles.Shard))
-                {
-                    var shard = _wormholesService.GetShardData(HttpContext.User.Identity.Name);
-                    newUnit.System = _systemsService.GetSystem(shard.Value.System);
-                }
+            if (!HttpContext.User.IsInRole(Roles.Admin) && !HttpContext.User.IsInRole(Roles.Shard)) return Unauthorized();
 
-                _unitsService.AddUnit(user, newUnit);
-            }
-            else
+            if (HttpContext.User.IsInRole(Roles.Shard) && HttpContext.User.Identity?.Name != null)
             {
-                return Unauthorized();
+                var wormhole = _wormholesService.GetWormholeByShardName(HttpContext.User.Identity.Name);
+                if (wormhole != null)
+                {
+                    var wormholeSystem = _systemsService.GetSystem(wormhole.System);
+                    if (wormholeSystem == null) throw new Exception("Wormhole system is null");
+                    newUnit.System = wormholeSystem;
+                }
             }
-            
+
+            _unitsService.AddUnit(user, newUnit);
+
             return new UnitsDto(newUnit);
         }
-
+        
         var destinationShard = unitsBodyDto.DestinationShard;
-
         if (destinationShard != null)
         {
             var unitUri = await _wormholesService.Jump(user, oldUnit, destinationShard);
@@ -152,7 +145,10 @@ public class UnitsController : ControllerBase
             return RedirectPermanentPreserveMethod(unitUri);
         }
 
+        if (unitsBodyDto.DestinationSystem == null) return BadRequest("Destination system is null");
         var destinationSystem = _systemsService.GetSystem(unitsBodyDto.DestinationSystem);
+        if (destinationSystem == null) return BadRequest("Destination system not found");
+
         var planets = _systemsService.GetAllSystems().SelectMany(system => system.Planets);
         var destinationPlanet = planets.FirstOrDefault(planet => planet.Name == unitsBodyDto.DestinationPlanet);
 
@@ -161,13 +157,9 @@ public class UnitsController : ControllerBase
 
         _unitsService.UpdateUnit(user, oldUnit);
 
-        if (resourcesQuantity != null && basePlanet.ResourceQuantity.Values.Sum() != resourcesQuantity.Values.Sum())
+        if (resourcesQuantity != null && basePlanet?.ResourceQuantity.Values.Sum() != resourcesQuantity.Values.Sum())
         {
-            
-            if (oldUnit is not CargoUnitModel cargoUnitModel)
-            {
-                return BadRequest();
-            }
+            if (oldUnit is not CargoUnitModel cargoUnitModel) return BadRequest("Unit is not cargo unit");
 
             var starport = _buildingsService.GetBuildingsByUser(user)
                 .Find(building =>
@@ -181,20 +173,17 @@ public class UnitsController : ControllerBase
             var resources = cargoUnitModel.LoadUnloadResources(resourcesQuantity);
 
             var isSuccess = user.TrySubtractResources(resources);
-
             if (!isSuccess) return BadRequest("Not enough resources");
 
             cargoUnitModel.ResourcesQuantity = resourcesQuantity;
         }
 
-        if (unitsBodyDto.DestinationSystem != unitsBodyDto.System ||
-            unitsBodyDto.DestinationPlanet != unitsBodyDto.Planet)
+        if (unitsBodyDto.DestinationSystem != unitsBodyDto.System || unitsBodyDto.DestinationPlanet != unitsBodyDto.Planet)
         {
             var userBuildings = _buildingsService.GetBuildingsByUser(user).ToArray();
             foreach (var building in userBuildings)
             {
-                if (building.System.Name != unitsBodyDto.System ||
-                    building.Planet.Name != unitsBodyDto.Planet) continue;
+                if (building.System.Name != unitsBodyDto.System || building.Planet.Name != unitsBodyDto.Planet) continue;
                 building.CancellationTokenSource.Cancel();
                 _buildingsService.RemoveBuilding(user, building);
             }

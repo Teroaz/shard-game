@@ -1,5 +1,5 @@
-using Shard.Web.ImplementationAPI.Models;
 using Shard.Web.ImplementationAPI.Users.Dtos;
+using Shard.Web.ImplementationAPI.Users.Models;
 
 namespace Shard.Web.ImplementationAPI.Users;
 

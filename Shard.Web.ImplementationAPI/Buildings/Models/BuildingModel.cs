@@ -1,20 +1,20 @@
 ﻿using Shard.Shared.Core;
-using Shard.Web.ImplementationAPI.Models;
 using Shard.Web.ImplementationAPI.Systems.Models;
+using Shard.Web.ImplementationAPI.Users.Models;
 
 namespace Shard.Web.ImplementationAPI.Buildings.Models;
 
 public abstract class BuildingModel
 {
-    public string Id { get; set; }
-    public UserModel User { get; set; }
+    public string Id { get; }
+    protected UserModel User { get; }
     public abstract BuildingType Type { get;}
-    public SystemModel System { get; set; }
-    public PlanetModel Planet { get; set; }
-    public bool IsBuilt { get; set; }
-    public DateTime? EstimatedBuildTime { get; set; }
+    public SystemModel System { get; }
+    public PlanetModel Planet { get; }
+    public bool IsBuilt { get; private set; }
+    public DateTime? EstimatedBuildTime { get; private set; }
     public Task? ConstructionTask { get; set; }
-    public CancellationTokenSource CancellationTokenSource { get; set; } = new();
+    public CancellationTokenSource CancellationTokenSource { get; } = new();
     
     protected BuildingModel(string id, UserModel user, SystemModel system, PlanetModel planet)
     {

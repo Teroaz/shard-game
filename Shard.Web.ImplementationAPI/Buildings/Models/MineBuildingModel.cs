@@ -1,6 +1,6 @@
 ﻿using Shard.Shared.Core;
-using Shard.Web.ImplementationAPI.Models;
 using Shard.Web.ImplementationAPI.Systems.Models;
+using Shard.Web.ImplementationAPI.Users.Models;
 
 namespace Shard.Web.ImplementationAPI.Buildings.Models;
 
@@ -27,34 +27,31 @@ public class MineBuildingModel : BuildingModel
         if (possibleResources.Count == 0) throw new Exception("No resources to mine");
         if (possibleResources.Count == 1) return possibleResources.First();
 
-        if (ResourceCategory == BuildingResourceCategory.Solid)
+        if (ResourceCategory != BuildingResourceCategory.Solid) throw new Exception("Unhandled resource category");
+        var planetAvailableResourceQuantity =
+            Planet.ResourceQuantity.Where(resourceQuantity => possibleResources.Contains(resourceQuantity.Key));
+        var targetResource =
+            Planet.ResourceQuantity.First(resourceQuantity => possibleResources.Contains(resourceQuantity.Key));
+        foreach (var resource in planetAvailableResourceQuantity)
         {
-            var planetAvailableResourceQuantity =
-                Planet.ResourceQuantity.Where(resourceQuantity => possibleResources.Contains(resourceQuantity.Key));
-            var targetResource =
-                Planet.ResourceQuantity.First(resourceQuantity => possibleResources.Contains(resourceQuantity.Key));
-            foreach (var resource in planetAvailableResourceQuantity)
+            // If the resource is more abundant than the current target resource, pick it
+            if (resource.Value > targetResource.Value)
             {
-                // Pick the most abundant resource
-                if (resource.Value > targetResource.Value)
-                {
-                    targetResource = resource;
-                }
-
-                // If there are multiple resources with the same quantity, pick the one with the highest rarity
-                if (resource.Value == targetResource.Value)
-                {
-                    targetResource =
-                        possibleResources.IndexOf(targetResource.Key) > possibleResources.IndexOf(resource.Key)
-                            ? resource
-                            : targetResource;
-                }
+                targetResource = resource;
             }
 
-            return targetResource.Key;
+            // If there is a tie, pick the resource with the highest index (rarity) in the list
+            if (resource.Value == targetResource.Value)
+            {
+                targetResource =
+                    possibleResources.IndexOf(targetResource.Key) > possibleResources.IndexOf(resource.Key)
+                        ? resource
+                        : targetResource;
+            }
         }
 
-        throw new Exception("Unhandled resource category");
+        return targetResource.Key;
+
     }
 
     private void Mine(ResourceKind resourceKind)

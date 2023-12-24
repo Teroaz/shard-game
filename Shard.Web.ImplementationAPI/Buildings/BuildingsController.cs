@@ -32,18 +32,18 @@ public class BuildingsController : ControllerBase
     public ActionResult<BuildingDto> CreateBuilding(string userId, [FromBody] CreateBuildingBodyDto createBuildingBodyDto)
     {
         var user = _usersService.GetUserById(userId);
-        if (user == null) return NotFound();
+        if (user == null) return NotFound("User not found");
 
-        if (createBuildingBodyDto.BuilderId == null || createBuildingBodyDto.Type == null) return BadRequest();
+        if (createBuildingBodyDto.BuilderId == null || createBuildingBodyDto.Type == null) return BadRequest("Missing parameters (builderId or type)");
 
-        if (!createBuildingBodyDto.Type.IsValidEnumValue<BuildingType>()) return BadRequest();
-        if (createBuildingBodyDto.ResourceCategory != null && !createBuildingBodyDto.ResourceCategory.IsValidEnumValue<BuildingResourceCategory>()) return BadRequest();
+        if (!createBuildingBodyDto.Type.IsValidEnumValue<BuildingType>()) return BadRequest("Invalid building type");
+        if (createBuildingBodyDto.ResourceCategory != null && !createBuildingBodyDto.ResourceCategory.IsValidEnumValue<BuildingResourceCategory>()) return BadRequest("Invalid resource category");
 
         var unit = _unitsService.GetUnitByIdAndUser(user, createBuildingBodyDto.BuilderId);
-        if (unit?.Planet == null) return BadRequest();
+        if (unit?.Planet == null) return BadRequest("Unit not found or not on a planet");
 
         var buildingType = createBuildingBodyDto.Type.ToEnum<BuildingType>();
-        if (buildingType == BuildingType.Mine && createBuildingBodyDto.ResourceCategory == null) return BadRequest();
+        if (buildingType == BuildingType.Mine && createBuildingBodyDto.ResourceCategory == null) return BadRequest("Missing resource category");
         var resourceCategory = createBuildingBodyDto.ResourceCategory?.ToEnum<BuildingResourceCategory>();
 
         BuildingModel building = buildingType switch
@@ -64,7 +64,7 @@ public class BuildingsController : ControllerBase
     public ActionResult<List<BuildingDto>> GetBuildings(string userId)
     {
         var user = _usersService.GetUserById(userId);
-        if (user == null) return NotFound();
+        if (user == null) return NotFound("User not found");
 
         var buildings = _buildingsService.GetBuildingsByUser(user);
 
@@ -75,12 +75,10 @@ public class BuildingsController : ControllerBase
     public async Task<ActionResult<BuildingDto>> Get(string userId, string buildingId)
     {
         var user = _usersService.GetUserById(userId);
-
-        if (user == null) return NotFound();
+        if (user == null) return NotFound("User not found");
 
         var building = _buildingsService.GetBuildingByIdAndUser(user, buildingId);
-
-        if (building == null) return NotFound();
+        if (building == null) return NotFound("Building not found");
 
         var now = _clock.Now;
         var estimatedBuildingTime = building.EstimatedBuildTime ?? now;
@@ -103,12 +101,12 @@ public class BuildingsController : ControllerBase
             }
             catch (TaskCanceledException)
             {
-                return NotFound();
+                return NotFound("Building not found");
             }
 
             building = _buildingsService.GetBuildingByIdAndUser(user, buildingId);
             // If building has been moved during the 2sec delay
-            if (building == null) return NotFound();
+            if (building == null) return NotFound("Building not found");
 
             return new BuildingDto(building);
         }
@@ -121,13 +119,13 @@ public class BuildingsController : ControllerBase
     public ActionResult<UnitsDto> AddToQueue(string userId, string starportId, [FromBody] QueueDto queue)
     {
         var user = _usersService.GetUserById(userId);
-        if (user == null) return NotFound();
+        if (user == null) return NotFound("User not found");
 
         var building = _buildingsService.GetBuildingByIdAndUser(user, starportId);
-        if (building == null) return NotFound();
-        if (!building.IsBuilt || building is not StarportBuildingModel starport) return BadRequest();
+        if (building == null) return NotFound("Building not found");
+        if (!building.IsBuilt || building is not StarportBuildingModel starport) return BadRequest("Building is not built or is not a starport");
 
-        if (!queue.Type.IsValidEnumValue<UnitType>()) return BadRequest();
+        if (!queue.Type.IsValidEnumValue<UnitType>()) return BadRequest("Invalid unit type");
 
         var queueUnitType = queue.Type.ToEnum<UnitType>();
 

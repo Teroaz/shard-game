@@ -1,17 +1,10 @@
 ﻿namespace Shard.Web.ImplementationAPI.Wormholes;
 
-public class WormholeData
+public record WormholeData(string ShardName, string BaseUri, string System, string User, string SharedPassword)
 {
-    public string BaseUri { get; set; }
-    public string System { get; set; }
-    public string User { get; set; }
-    public string SharedPassword { get; set; }
-
-    public WormholeData(string baseUri, string system, string user, string sharedPassword)
-    {
-        BaseUri = baseUri;
-        System = system;
-        User = user;
-        SharedPassword = sharedPassword;
-    }
+    public string ShardName { get; set; } = ShardName;
+    public string BaseUri { get; set; } = BaseUri;
+    public string System { get; set; } = System;
+    public string User { get; set; } = User;
+    public string SharedPassword { get; set; } = SharedPassword;
 }

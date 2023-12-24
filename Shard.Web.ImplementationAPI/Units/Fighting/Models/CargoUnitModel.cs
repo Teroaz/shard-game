@@ -1,6 +1,6 @@
 using Shard.Shared.Core;
-using Shard.Web.ImplementationAPI.Models;
 using Shard.Web.ImplementationAPI.Systems.Models;
+using Shard.Web.ImplementationAPI.Users.Models;
 
 namespace Shard.Web.ImplementationAPI.Units.Fighting.Models;
 
@@ -12,7 +12,7 @@ public class CargoUnitModel : FightingUnitModel
 
     public CargoUnitModel(UserModel user, SystemModel system, PlanetModel? planet, Dictionary<ResourceKind, int>? resourcesQuantity)
         : this(Guid.NewGuid().ToString(), user, system, planet)
-    { 
+    {
         ResourcesQuantity = resourcesQuantity ?? new Dictionary<ResourceKind, int>();
     }
 
@@ -29,17 +29,17 @@ public class CargoUnitModel : FightingUnitModel
 
     protected override List<UnitType> GetPriorityTargetTypes()
     {
-        return new List<UnitType> {};
+        return new List<UnitType>();
     }
-    
+
     public Dictionary<ResourceKind, int> LoadUnloadResources(Dictionary<ResourceKind, int> newResources)
     {
         var resourcesToLoadUnload = new Dictionary<ResourceKind, int>();
 
         foreach (var resource in newResources)
         {
-            int currentQuantity = ResourcesQuantity.TryGetValue(resource.Key, out int quantity) ? quantity : 0;
-            int difference = resource.Value - currentQuantity;
+            var currentQuantity = ResourcesQuantity.TryGetValue(resource.Key, out var quantity) ? quantity : 0;
+            var difference = resource.Value - currentQuantity;
             resourcesToLoadUnload[resource.Key] = difference;
         }
 
@@ -48,9 +48,9 @@ public class CargoUnitModel : FightingUnitModel
 
     public bool CompareResources(Dictionary<ResourceKind, int> resources)
     {
-        return ResourcesQuantity.Count == resources.Count && 
-               ResourcesQuantity.All(kv => resources.TryGetValue(kv.Key, out int value) && value == kv.Value);
+        if (ResourcesQuantity == null) return false;
+
+        return ResourcesQuantity.Count == resources.Count &&
+               ResourcesQuantity.All(kv => resources.TryGetValue(kv.Key, out var value) && value == kv.Value);
     }
-
-
 }

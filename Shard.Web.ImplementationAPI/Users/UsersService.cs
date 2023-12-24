@@ -1,15 +1,14 @@
-using Shard.Web.ImplementationAPI.Models;
 using Shard.Web.ImplementationAPI.Systems;
 using Shard.Web.ImplementationAPI.Units;
 using Shard.Web.ImplementationAPI.Units.Models;
 using Shard.Web.ImplementationAPI.Users.Dtos;
+using Shard.Web.ImplementationAPI.Users.Models;
 using Shard.Web.ImplementationAPI.Utils;
 
 namespace Shard.Web.ImplementationAPI.Users;
 
 public class UsersService : IUsersService
 {
-    // 89
     private readonly IUsersRepository _usersRepository;
     private readonly ISystemsService _systemsService;
     private readonly IUnitsRepository _unitsRepository;
