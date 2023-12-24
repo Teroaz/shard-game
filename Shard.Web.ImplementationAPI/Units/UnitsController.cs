@@ -157,8 +157,9 @@ public class UnitsController : ControllerBase
 
         _unitsService.UpdateUnit(user, oldUnit);
 
-        if (resourcesQuantity != null)
+        if (resourcesQuantity != null && basePlanet.ResourceQuantity.Values.Sum() != resourcesQuantity.Values.Sum())
         {
+            
             if (oldUnit is not CargoUnitModel cargoUnitModel)
             {
                 return BadRequest();
